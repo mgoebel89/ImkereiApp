@@ -1,6 +1,6 @@
 (function () {
   'use strict';
-  const { renderUebersicht, renderStaende, renderVoelker, renderBehandlungen, renderEinstellungen } = IM.views;
+  const { renderUebersicht, renderStaende, renderVoelker, renderBehandlungen, renderHonig, renderEinstellungen } = IM.views;
 
   const mount = document.getElementById('app');
   const shell = document.getElementById('appShell');
@@ -15,6 +15,9 @@
       { path: '/staende', label: 'Stände', icon: 'pin' },
       { path: '/behandlungen', label: 'Behandlungen', icon: 'drop' },
     ] },
+    { label: 'Ertrag', items: [
+      { path: '/honig', label: 'Honig', icon: 'jar' },
+    ] },
     { footer: true, items: [
       { path: '/einstellungen', label: 'Einstellungen', icon: 'gear' },
     ] },
@@ -25,6 +28,7 @@
     hive: '<path d="M6 4h12l2 4-2 4H6L4 8z"/><path d="M6 12h12l2 4-2 4H6l-2-4z"/>',
     pin: '<path d="M12 21s7-6.4 7-11a7 7 0 10-14 0c0 4.6 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/>',
     drop: '<path d="M12 3s6 6.5 6 10a6 6 0 01-12 0c0-3.5 6-10 6-10z"/>',
+    jar: '<path d="M9 3h6v3H9z"/><path d="M7 6h10v13a2 2 0 01-2 2H9a2 2 0 01-2-2z"/><path d="M7 11h10"/>',
     gear: '<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/>',
   };
 
@@ -97,6 +101,7 @@
     if (path === '/staende') return renderStaende(mount);
     if (path === '/voelker') return renderVoelker(mount, params);
     if (path === '/behandlungen') return renderBehandlungen(mount, params);
+    if (path === '/honig') return renderHonig(mount, params);
     if (path === '/einstellungen') return renderEinstellungen(mount);
     mount.innerHTML = '<div class="card"><h2>Seite nicht gefunden</h2><a href="#/">Zurück zur Übersicht</a></div>';
   }

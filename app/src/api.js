@@ -68,6 +68,11 @@
   const behandlungenApi = crud('behandlungen');
   const fuetterungenApi = crud('fuetterungen');
 
+  // --- Modul Honig ---
+  const erntenApi = crud('ernten');
+  const gebindeApi = crud('gebinde');
+  const abfuellungenApi = crud('abfuellungen');
+
   // --- Fotos zu Durchsichten ---
   async function listVolkFotos(volkId) { return jsonFetch(`/api/voelker/${encodeURIComponent(volkId)}/fotos`); }
   async function uploadVolkFoto(volkId, file, kind) {
@@ -120,6 +125,9 @@
     putVolk: voelkerApi.put, deleteVolkRemote: voelkerApi.del,
     putBehandlung: behandlungenApi.put, deleteBehandlungRemote: behandlungenApi.del,
     putFuetterung: fuetterungenApi.put, deleteFuetterungRemote: fuetterungenApi.del,
+    putErnte: erntenApi.put, deleteErnteRemote: erntenApi.del,
+    putGebinde: gebindeApi.put, deleteGebindeRemote: gebindeApi.del,
+    putAbfuellung: abfuellungenApi.put, deleteAbfuellungRemote: abfuellungenApi.del,
     listVolkFotos, uploadVolkFoto, deleteVolkFoto, volkFotoUrl,
     subscribe, connectWs,
   };

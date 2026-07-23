@@ -13,6 +13,9 @@
     volkFiles: {},      // volkId -> [{id, kind, filename, ...}]
     behandlungen: [],
     fuetterungen: [],
+    ernten: [],
+    gebinde: [],
+    abfuellungen: [],
     ready: false,
     backendAvailable: false,
   };
@@ -66,6 +69,9 @@
       tableVoelkerName: 'Voelker', tableVoelkerId: '',
       tableBehandlungenName: 'Behandlungen', tableBehandlungenId: '',
       tableFuetterungenName: 'Fuetterungen', tableFuetterungenId: '',
+      tableErntenName: 'Ernten', tableErntenId: '',
+      tableGebindeName: 'Gebinde', tableGebindeId: '',
+      tableAbfuellungenName: 'Abfuellungen', tableAbfuellungenId: '',
     };
   }
 
@@ -111,6 +117,19 @@
     return m;
   }
 
+  function migrateErnte(e) {
+    if (!e) return e;
+    if (!Array.isArray(e.volkIds)) e.volkIds = [];
+    if (!Array.isArray(e.wiegungen)) e.wiegungen = [];
+    return e;
+  }
+
+  function migrateGebinde(g) {
+    if (!g) return g;
+    if (!Array.isArray(g.befuellungen)) g.befuellungen = [];
+    return g;
+  }
+
   // ----- Bootstrap -----
   async function bootstrap() {
     try {
@@ -121,6 +140,9 @@
       cache.volkFiles = snap.volkFiles || {};
       cache.behandlungen = (snap.behandlungen || []).map(migrateMassnahme);
       cache.fuetterungen = (snap.fuetterungen || []).map(migrateMassnahme);
+      cache.ernten = (snap.ernten || []).map(migrateErnte);
+      cache.gebinde = (snap.gebinde || []).map(migrateGebinde);
+      cache.abfuellungen = snap.abfuellungen || [];
       cache.backendAvailable = true;
       cache.ready = true;
       mergeSettingsDefaults();
@@ -155,13 +177,16 @@
     // Eigene Echos ignorieren — sonst rerendert das UI, während der User tippt.
     if (msg.origin && IM.api && IM.api.clientId && msg.origin === IM.api.clientId) return;
 
-    // Die vier Entitäten verhalten sich gleich; nur Volk und Maßnahmen brauchen
-    // vor dem Einsortieren ihre Migration.
+    // Alle Entitäten verhalten sich gleich; einige brauchen vor dem
+    // Einsortieren nur noch ihre Migration.
     const ENT = {
       stand: { arr: 'staende', migrate: x => x },
       volk: { arr: 'voelker', migrate: migrateVolk },
       behandlung: { arr: 'behandlungen', migrate: migrateMassnahme },
       fuetterung: { arr: 'fuetterungen', migrate: migrateMassnahme },
+      ernte: { arr: 'ernten', migrate: migrateErnte },
+      gebinde: { arr: 'gebinde', migrate: migrateGebinde },
+      abfuellung: { arr: 'abfuellungen', migrate: x => x },
     };
     const [ent, action] = msg.type.split(':');
 
@@ -304,6 +329,53 @@
     },
     volkFotoUrl(fileId) { return IM.api.volkFotoUrl(fileId); },
 
+    // --- Ernten (Modul Honig) ---
+    listErnten() { return cache.ernten.slice(); },
+    getErnte(id) { return cache.ernten.find(e => e.id === id) || null; },
+    saveErnte(e) {
+      migrateErnte(e);
+      e.lastModifiedAt = nowIso();
+      upsertInto(cache.ernten, e);
+      bgSave(IM.api.putErnte(e), 'saveErnte');
+      notifyChange();
+    },
+    deleteErnte(id) {
+      cache.ernten = cache.ernten.filter(e => e.id !== id);
+      bgSave(IM.api.deleteErnteRemote(id), 'deleteErnte');
+      notifyChange();
+    },
+
+    // --- Lagergebinde ---
+    listGebinde() { return cache.gebinde.slice(); },
+    getGebinde(id) { return cache.gebinde.find(g => g.id === id) || null; },
+    saveGebinde(g) {
+      migrateGebinde(g);
+      g.lastModifiedAt = nowIso();
+      upsertInto(cache.gebinde, g);
+      bgSave(IM.api.putGebinde(g), 'saveGebinde');
+      notifyChange();
+    },
+    deleteGebinde(id) {
+      cache.gebinde = cache.gebinde.filter(g => g.id !== id);
+      bgSave(IM.api.deleteGebindeRemote(id), 'deleteGebinde');
+      notifyChange();
+    },
+
+    // --- Abfuellchargen ---
+    listAbfuellungen() { return cache.abfuellungen.slice(); },
+    getAbfuellung(id) { return cache.abfuellungen.find(a => a.id === id) || null; },
+    saveAbfuellung(a) {
+      a.lastModifiedAt = nowIso();
+      upsertInto(cache.abfuellungen, a);
+      bgSave(IM.api.putAbfuellung(a), 'saveAbfuellung');
+      notifyChange();
+    },
+    deleteAbfuellung(id) {
+      cache.abfuellungen = cache.abfuellungen.filter(a => a.id !== id);
+      bgSave(IM.api.deleteAbfuellungRemote(id), 'deleteAbfuellung');
+      notifyChange();
+    },
+
     // --- Sync-State (NocoDB) -----------------------------------------------
     // Merkt je Datensatz, wann er zuletzt erfolgreich nach NocoDB ging. Liegt
     // bewusst im localStorage: es ist ein Zustand DIESES Geräts, kein Inhalt.
@@ -313,7 +385,8 @@
       catch (_) { s = {}; }
       // Jede sync-fähige Entität braucht ihren Eimer — fehlt er, laufen
       // markSynced/isDirty in „Cannot set properties of undefined".
-      for (const k of ['staende', 'voelker', 'behandlungen', 'fuetterungen']) {
+      for (const k of ['staende', 'voelker', 'behandlungen', 'fuetterungen',
+        'ernten', 'gebinde', 'abfuellungen']) {
         if (!s[k] || typeof s[k] !== 'object') s[k] = {};
       }
       return s;

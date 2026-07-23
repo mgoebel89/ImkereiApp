@@ -349,6 +349,29 @@ textarea.inp { resize: vertical; min-height: 70px; }
 }
 .volk-chip.aktiv { background: var(--akzent); border-color: var(--akzent-dunkel); color: #fff; }
 
+/* --------------------------------------------------------------- Honig */
+/* Eimer wiegen: Bezeichnung, brutto, tara, errechnetes Netto, Entfernen.
+   Auf dem Handy bricht die Zeile um, statt die Felder unbedienbar zu quetschen. */
+.wiegung-zeile {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1fr auto auto;
+  gap: 6px; align-items: center; margin-bottom: 7px;
+}
+.wiegung-netto { font-size: .85rem; color: var(--text-schwach); white-space: nowrap; min-width: 68px; }
+
+.bef-zeile {
+  display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
+  padding: 8px 0; border-bottom: 1px solid #eef0f3;
+}
+.bef-text { flex: 1; min-width: 160px; }
+.bef-menge { max-width: 110px; }
+
+@media (max-width: 560px) {
+  .wiegung-zeile { grid-template-columns: 1fr 1fr; }
+  .wiegung-zeile .wiegung-bez { grid-column: 1 / -1; }
+  .wiegung-netto { min-width: 0; }
+}
+
 /* -------------------------------------------------------------------- Fotos */
 .foto-pick { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
 .foto-reihe { display: flex; gap: 8px; flex-wrap: wrap; margin: 8px 0; }

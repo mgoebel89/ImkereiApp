@@ -35,6 +35,7 @@
     grid.appendChild(karteWartezeiten(aktive));
     grid.appendChild(karteStaende(staende, voelker));
     grid.appendChild(karteKoeniginnen(aktive));
+    grid.appendChild(karteHonig());
     grid.appendChild(karteLetzteEintraege());
     mount.appendChild(grid);
   }
@@ -115,6 +116,41 @@
     ]);
 
     return karte(`Königinnen zum Umweiseln (${alt.length})`, inhalt);
+  }
+
+  // --- Honig ----------------------------------------------------------------
+  // Die drei Zahlen, die die Saison zusammenfassen: was kam rein, was liegt noch
+  // im Lager, was ist im Glas.
+  function karteHonig() {
+    const jahr = String(new Date().getFullYear());
+    const ernten = store.listErnten().filter(e => String(e.datum || '').startsWith(jahr));
+    const abf = store.listAbfuellungen();
+    const abfJahr = abf.filter(a => String(a.datum || '').startsWith(jahr));
+    const geerntet = ernten.reduce((s, e) => s + models.ernteMenge(e), 0);
+    const imLager = store.listGebinde().reduce((s, g) => s + Math.max(0, models.gebindeRest(g, abf)), 0);
+    const glaeser = abfJahr.reduce((s, a) => s + (Number(a.anzahlGlaeser) || 0), 0);
+
+    // Ernten, die nirgends eingelagert wurden — die reißen sonst still die
+    // Rückverfolgung auf.
+    const ohneGebinde = ernten.filter(e =>
+      !store.listGebinde().some(g => (g.befuellungen || []).some(b => b.ernteId === e.id)));
+
+    const inhalt = el('div', {}, [
+      el('div', { class: 'kachel-zahlen' }, [
+        el('div', { class: 'zahl' }, [el('strong', {}, IM.ui.formatZahl(geerntet, 1)), el('span', {}, 'kg geerntet')]),
+        el('div', { class: 'zahl' }, [el('strong', {}, IM.ui.formatZahl(imLager, 1)), el('span', {}, 'kg im Lager')]),
+        el('div', { class: 'zahl' }, [el('strong', {}, String(glaeser)), el('span', {}, 'Gläser abgefüllt')]),
+      ]),
+      ohneGebinde.length
+        ? el('div', { class: 'ampel ampel-bald' },
+            `${ohneGebinde.length} Ernte(n) ohne Lagergebinde — dort fehlt die Herkunftskette.`)
+        : null,
+      el('div', { class: 'btn-reihe' }, [
+        el('a', { class: 'btn btn-sm', href: '#/honig' }, 'Zum Honigmodul'),
+      ]),
+    ]);
+
+    return karte(`Honig ${jahr}`, inhalt);
   }
 
   // --- Letzte Einträge ------------------------------------------------------

@@ -159,6 +159,57 @@
     { title: 'Payload', uidt: 'LongText' },
   ];
 
+  // --- Modul Honig ---
+  const ERNTEN_COLUMNS = [
+    { title: 'ErnteId', uidt: 'SingleLineText', pv: true },
+    { title: 'Datum', uidt: 'Date' },
+    { title: 'Schleuderdatum', uidt: 'Date' },
+    { title: 'Stand', uidt: 'SingleLineText' },
+    { title: 'Voelker', uidt: 'LongText' },
+    { title: 'AnzahlVoelker', uidt: 'Number' },
+    { title: 'Tracht', uidt: 'SingleLineText' },
+    { title: 'MengeKg', uidt: 'Number' },
+    { title: 'AnzahlEimer', uidt: 'Number' },
+    { title: 'WassergehaltProzent', uidt: 'Number' },
+    { title: 'LastModifiedAt', uidt: 'SingleLineText' },
+    { title: 'Payload', uidt: 'LongText' },
+  ];
+
+  const GEBINDE_COLUMNS = [
+    { title: 'GebindeId', uidt: 'SingleLineText', pv: true },
+    { title: 'Nummer', uidt: 'SingleLineText' },
+    { title: 'Bezeichnung', uidt: 'SingleLineText' },
+    { title: 'KapazitaetKg', uidt: 'Number' },
+    { title: 'Standort', uidt: 'SingleLineText' },
+    { title: 'GefuelltKg', uidt: 'Number' },
+    { title: 'EntnommenKg', uidt: 'Number' },
+    { title: 'RestKg', uidt: 'Number' },
+    { title: 'AnzahlBefuellungen', uidt: 'Number' },
+    { title: 'Trachten', uidt: 'SingleLineText' },
+    { title: 'Notiz', uidt: 'LongText' },
+    { title: 'LastModifiedAt', uidt: 'SingleLineText' },
+    { title: 'Payload', uidt: 'LongText' },
+  ];
+
+  const ABFUELLUNGEN_COLUMNS = [
+    { title: 'AbfuellungId', uidt: 'SingleLineText', pv: true },
+    { title: 'Losnummer', uidt: 'SingleLineText' },
+    { title: 'Datum', uidt: 'Date' },
+    { title: 'MHD', uidt: 'Date' },
+    { title: 'Sorte', uidt: 'SingleLineText' },
+    { title: 'Gebinde', uidt: 'SingleLineText' },
+    { title: 'GlasGroesseG', uidt: 'Number' },
+    { title: 'AnzahlGlaeser', uidt: 'Number' },
+    { title: 'MengeKg', uidt: 'Number' },
+    // Die Herkunft ausgeschrieben: damit beantwortet schon die NocoDB-Zeile
+    // die Rückrufsfrage, ohne dass die App laufen muss.
+    { title: 'HerkunftVoelker', uidt: 'LongText' },
+    { title: 'HerkunftErnten', uidt: 'LongText' },
+    { title: 'Notiz', uidt: 'LongText' },
+    { title: 'LastModifiedAt', uidt: 'SingleLineText' },
+    { title: 'Payload', uidt: 'LongText' },
+  ];
+
   async function createTable(title, columns) {
     const s = settings();
     return api(`/api/v2/meta/bases/${encodeURIComponent(s.baseId)}/tables`, {
@@ -217,6 +268,27 @@
       columns: FUETTERUNGEN_COLUMNS,
       list: () => store.listFuetterungen(), save: (o) => store.saveFuetterung(o),
       row: (o) => buildFuetterungRow(o),
+    },
+    {
+      kind: 'ernten', label: 'Ernten', extId: 'ErnteId',
+      idKey: 'tableErntenId', nameKey: 'tableErntenName', fallback: 'Ernten',
+      columns: ERNTEN_COLUMNS,
+      list: () => store.listErnten(), save: (o) => store.saveErnte(o),
+      row: (o) => buildErnteRow(o),
+    },
+    {
+      kind: 'gebinde', label: 'Lagergebinde', extId: 'GebindeId',
+      idKey: 'tableGebindeId', nameKey: 'tableGebindeName', fallback: 'Gebinde',
+      columns: GEBINDE_COLUMNS,
+      list: () => store.listGebinde(), save: (o) => store.saveGebinde(o),
+      row: (o) => buildGebindeRow(o),
+    },
+    {
+      kind: 'abfuellungen', label: 'Abfüllchargen', extId: 'AbfuellungId',
+      idKey: 'tableAbfuellungenId', nameKey: 'tableAbfuellungenName', fallback: 'Abfuellungen',
+      columns: ABFUELLUNGEN_COLUMNS,
+      list: () => store.listAbfuellungen(), save: (o) => store.saveAbfuellung(o),
+      row: (o) => buildAbfuellungRow(o),
     },
   ];
 
@@ -394,6 +466,71 @@
     };
   }
 
+  // --- Modul Honig ---
+  function buildErnteRow(e) {
+    return {
+      ErnteId: e.id,
+      Datum: isoDateOrNull(e.datum),
+      Schleuderdatum: isoDateOrNull(e.schleuderdatum),
+      Stand: standName(e.standId),
+      Voelker: volkNamen(e.volkIds),
+      AnzahlVoelker: (e.volkIds || []).length,
+      Tracht: e.tracht || '',
+      MengeKg: IM.models.ernteMenge(e),
+      AnzahlEimer: (e.wiegungen || []).filter(w => Number(w.brutto)).length,
+      WassergehaltProzent: e.wassergehalt === null || e.wassergehalt === '' ? null : Number(e.wassergehalt),
+      LastModifiedAt: e.lastModifiedAt || '',
+      Payload: JSON.stringify(e),
+    };
+  }
+
+  function buildGebindeRow(g) {
+    const abf = store.listAbfuellungen();
+    const ernten = store.listErnten();
+    const trachten = [...new Set((g.befuellungen || [])
+      .map(b => (ernten.find(e => e.id === b.ernteId) || {}).tracht)
+      .filter(Boolean))].join(', ');
+    return {
+      GebindeId: g.id,
+      Nummer: g.nummer || '',
+      Bezeichnung: g.bezeichnung || '',
+      KapazitaetKg: g.kapazitaetKg === null || g.kapazitaetKg === '' ? null : Number(g.kapazitaetKg),
+      Standort: g.standort || '',
+      GefuelltKg: IM.models.gebindeGefuellt(g),
+      EntnommenKg: IM.models.gebindeEntnommen(g.id, abf),
+      RestKg: IM.models.gebindeRest(g, abf),
+      AnzahlBefuellungen: (g.befuellungen || []).length,
+      Trachten: trachten,
+      Notiz: g.notiz || '',
+      LastModifiedAt: g.lastModifiedAt || '',
+      Payload: JSON.stringify(g),
+    };
+  }
+
+  function buildAbfuellungRow(a) {
+    const herkunft = IM.models.chargenHerkunft(a, store.listGebinde(), store.listErnten());
+    const g = herkunft.gebinde;
+    return {
+      AbfuellungId: a.id,
+      Losnummer: a.losnummer || '',
+      Datum: isoDateOrNull(a.datum),
+      MHD: isoDateOrNull(a.mhd),
+      Sorte: a.sorte || '',
+      Gebinde: g ? [g.nummer, g.bezeichnung].filter(Boolean).join(' ') : '',
+      GlasGroesseG: Number(a.glasGroesseG) || null,
+      AnzahlGlaeser: Number(a.anzahlGlaeser) || null,
+      MengeKg: IM.models.abfuellMenge(a),
+      HerkunftVoelker: volkNamen(herkunft.volkIds),
+      HerkunftErnten: herkunft.posten
+        .filter(p => p.ernte)
+        .map(p => `${IM.ui.formatDatum(p.ernte.datum)} ${p.ernte.tracht || ''} (${p.befuellung.mengeKg} kg)`.replace(/\s+/g, ' ').trim())
+        .join('; '),
+      Notiz: a.notiz || '',
+      LastModifiedAt: a.lastModifiedAt || '',
+      Payload: JSON.stringify(a),
+    };
+  }
+
   // --- Sync -----------------------------------------------------------------
   async function syncEntity(kind, obj) {
     const m = modulByKind(kind);
@@ -452,6 +589,9 @@
     syncEntity, restoreFromNocoDb,
     MODULE,
     // für Tests/Diagnose
-    _builders: { buildStandRow, buildVolkRow, buildBehandlungRow, buildFuetterungRow },
+    _builders: {
+      buildStandRow, buildVolkRow, buildBehandlungRow, buildFuetterungRow,
+      buildErnteRow, buildGebindeRow, buildAbfuellungRow,
+    },
   };
 })();

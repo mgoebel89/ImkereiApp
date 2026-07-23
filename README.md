@@ -224,17 +224,45 @@ gefütterten Völker wird laufend mitgerechnet.
   Das ist ein Ausgabeformat für die erfassten Daten, kein Rechtsdokument-Generator
   — was das Veterinäramt konkret verlangt, entscheidet das Amt.
 
-### Modul Honig (geplant)
+### Modul Honig
 
-Rückverfolgbarkeit in drei Stufen:
+Umgesetzt. Rückverfolgbarkeit in drei Stufen, weil der Honig genau diesen Weg
+nimmt — von jedem Glas führt er rückwärts bis zum einzelnen Volk.
 
-1. **Ernte** je Volk oder Stand mit Datum, Tracht, Menge und Wassergehalt.
-2. **Lagergebinde** (Hobbock) mit eigener Nummer, gespeist aus einer oder mehreren
-   Ernten — damit ist Verschnitt abbildbar.
-3. **Abfüllcharge** mit Losnummer, MHD, Glasgröße und Stückzahl.
+**1. Ernte.** Datum der Entnahme und, getrennt davon, des Schleuderns; Stand und
+beerntete Völker (dieselbe Mehrfachauswahl wie bei den Behandlungen); Tracht;
+Wassergehalt. Die Menge entsteht aus **Brutto- und Leergewicht je Eimer** — die
+App rechnet, die Herleitung bleibt im Datensatz sichtbar.
 
-Von jedem Glas führt der Weg rückwärts bis zum Volk. Die Wartezeiten aus dem
-Behandlungsmodul sperren die Ernte betroffener Völker.
+Der Wassergehalt wird bewertet: bis 18 % lagerstabil, darüber Gärungsgefahr, über
+20 % nicht verkehrsfähig.
+
+**Wartezeit-Sperre.** Wählst du ein Volk, an dem zum Erntedatum noch die Wartezeit
+einer Arzneimittel-Anwendung lief, warnt die App deutlich. Sie hält dich nicht auf
+— aber sie sagt es, und das Chargenblatt hält es später fest.
+
+**2. Lagergebinde.** Der Hobbock, mit Nummer, Kapazität und Lagerort. Er wird aus
+einer oder mehreren Ernten befüllt, womit **Verschnitt** abbildbar ist. Die App
+führt die Bilanz: eingefüllt minus abgefüllt = was noch drin liegt. Beim Einfüllen
+schlägt sie die Menge vor, die von der Ernte noch nicht eingelagert ist.
+
+**3. Abfüllcharge.** Losnummer, Abfülldatum, MHD, Sorte, Glasgröße und Stückzahl;
+die Menge ergibt sich daraus. **Losnummer und MHD werden vorgeschlagen** —
+`2026-004` für die vierte Abfüllung des Jahres, MHD zwei Jahre ab Abfüllung — und
+lassen sich überschreiben. Eine doppelte Losnummer fragt nach.
+
+Beim Anlegen zeigt die Charge die Herkunft mit an, inklusive Anteil jeder Ernte am
+Gebinde, und weist darauf hin, wenn mehrere Trachten zusammenfließen (dann trägt
+nur eine Sammelbezeichnung wie „Blütenhonig gemischt").
+
+Ein Restbestand verkaufter Gläser wird **nicht** geführt — erfasst wird, was
+abgefüllt wurde.
+
+**Chargenblatt (PDF).** Das Dokument, das im Ernstfall zählt: von der Losnummer
+über das Gebinde zu den eingeflossenen Ernten (mit Anteil, Tracht, Wassergehalt),
+von dort zu den beteiligten Völkern (Stand, Königin, Beute) und schließlich zu den
+Arzneimittel-Anwendungen an genau diesen Völkern. Lag eine Ernte innerhalb einer
+laufenden Wartezeit, steht das rot im Blatt.
 
 ### Modul Lager (geplant)
 

@@ -66,6 +66,27 @@ db.exec(`
   );
   CREATE INDEX IF NOT EXISTS idx_fuetterungen_modified ON fuetterungen(last_modified);
 
+  -- Modul Honig ------------------------------------------------------------
+  -- Drei Stufen der Rückverfolgbarkeit: Ernte je Volk, Lagergebinde (kann aus
+  -- mehreren Ernten gespeist sein), Abfüllcharge mit Losnummer.
+  CREATE TABLE IF NOT EXISTS ernten (
+    id            TEXT PRIMARY KEY,
+    payload       TEXT NOT NULL,
+    last_modified TEXT NOT NULL
+  );
+  CREATE INDEX IF NOT EXISTS idx_ernten_modified ON ernten(last_modified);
+  CREATE TABLE IF NOT EXISTS gebinde (
+    id            TEXT PRIMARY KEY,
+    payload       TEXT NOT NULL,
+    last_modified TEXT NOT NULL
+  );
+  CREATE TABLE IF NOT EXISTS abfuellungen (
+    id            TEXT PRIMARY KEY,
+    payload       TEXT NOT NULL,
+    last_modified TEXT NOT NULL
+  );
+  CREATE INDEX IF NOT EXISTS idx_abfuellungen_modified ON abfuellungen(last_modified);
+
   -- Fotos zu Durchsichten eines Volkes (kind = ds_<durchsichtId>)
   CREATE TABLE IF NOT EXISTS volk_files (
     id          TEXT PRIMARY KEY,
@@ -171,6 +192,26 @@ const getFuetterung = (id) => fuetterungenStore.get(id);
 const saveFuetterung = (f) => fuetterungenStore.save(f);
 const deleteFuetterung = (id) => fuetterungenStore.delete(id);
 
+// --- Modul Honig ----------------------------------------------------------
+const erntenStore = makePayloadStore('ernten');
+const gebindeStore = makePayloadStore('gebinde');
+const abfuellungenStore = makePayloadStore('abfuellungen');
+
+const listErnten = () => erntenStore.list();
+const getErnte = (id) => erntenStore.get(id);
+const saveErnte = (e) => erntenStore.save(e);
+const deleteErnte = (id) => erntenStore.delete(id);
+
+const listGebinde = () => gebindeStore.list();
+const getGebinde = (id) => gebindeStore.get(id);
+const saveGebinde = (g) => gebindeStore.save(g);
+const deleteGebinde = (id) => gebindeStore.delete(id);
+
+const listAbfuellungen = () => abfuellungenStore.list();
+const getAbfuellung = (id) => abfuellungenStore.get(id);
+const saveAbfuellung = (a) => abfuellungenStore.save(a);
+const deleteAbfuellung = (id) => abfuellungenStore.delete(id);
+
 // --- Fotos zu einem Volk --------------------------------------------------
 function listVolkFiles(volkId) {
   return db.prepare('SELECT id, volk_id AS volkId, kind, filename, mimetype, size, uploaded_at AS uploadedAt FROM volk_files WHERE volk_id = ? ORDER BY uploaded_at ASC').all(volkId);
@@ -210,6 +251,9 @@ module.exports = {
   listVoelker, getVolk, saveVolk, deleteVolk,
   listBehandlungen, getBehandlung, saveBehandlung, deleteBehandlung,
   listFuetterungen, getFuetterung, saveFuetterung, deleteFuetterung,
+  listErnten, getErnte, saveErnte, deleteErnte,
+  listGebinde, getGebinde, saveGebinde, deleteGebinde,
+  listAbfuellungen, getAbfuellung, saveAbfuellung, deleteAbfuellung,
   listVolkFiles, getVolkFile, volkFilePath, ensureVolkFileDir,
   insertVolkFile, deleteVolkFile,
 };

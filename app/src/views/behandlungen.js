@@ -127,6 +127,10 @@
   // --- Volk-Auswahl ---------------------------------------------------------
   // Eine Behandlung trifft fast immer den ganzen Stand. Deshalb: Stand wählen,
   // „alle" antippen, einzelne abwählen — nicht 20-mal einzeln ankreuzen.
+  //
+  // Arbeitet auf `obj.standId` und `obj.volkIds` und wird auch vom Honig-Modul
+  // benutzt (eine Ernte betrifft ebenso mehrere Völker) — deshalb unten als
+  // IM.views.volkAuswahl geteilt.
   function volkAuswahl(obj, onChange) {
     const wrap = el('div', {});
     function render() {
@@ -356,4 +360,5 @@
   }
 
   IM.views.renderBehandlungen = renderBehandlungen;
+  IM.views.volkAuswahl = volkAuswahl;
 })();

@@ -12,6 +12,7 @@ const { WebSocketServer } = require('ws');
 
 const db = require('./db');
 const createStoeckeRouter = require('./routes/stoecke');
+const createHonigRouter = require('./routes/honig');
 
 const PORT = parseInt(process.env.PORT || '3000', 10);
 const HOST = process.env.HOST || '127.0.0.1';
@@ -40,6 +41,9 @@ app.get('/api/health', (_req, res) => res.json({ ok: true, version: 1 }));
 // --- Modul: Bienenstöcke (Stände, Völker, Behandlungen, Fütterungen) ---
 app.use('/api', createStoeckeRouter(broadcast));
 
+// --- Modul: Honig (Ernten, Lagergebinde, Abfüllchargen) ---
+app.use('/api', createHonigRouter(broadcast));
+
 // --- Snapshot (Bootstrap) ---
 // Das Frontend zieht beim Start EINEN Snapshot und arbeitet danach auf seinem
 // Cache; Änderungen anderer Geräte kommen per WebSocket nach.
@@ -51,6 +55,9 @@ app.get('/api/snapshot', (_req, res) => {
     volkFiles: groupVolkFiles(),
     behandlungen: db.listBehandlungen(),
     fuetterungen: db.listFuetterungen(),
+    ernten: db.listErnten(),
+    gebinde: db.listGebinde(),
+    abfuellungen: db.listAbfuellungen(),
     serverTime: new Date().toISOString(),
   });
 });

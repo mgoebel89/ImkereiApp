@@ -333,6 +333,175 @@
   }
 
   // ---------------------------------------------------------------------------
+  // Honig: Ernte → Lagergebinde → Abfüllcharge
+  // ---------------------------------------------------------------------------
+  // Drei Stufen, weil der Honig genau diesen Weg nimmt und Verschnitt sonst
+  // nicht abbildbar wäre: geerntet wird je Volk, gelagert wird im Hobbock (der
+  // aus mehreren Ernten gespeist sein kann), abgefüllt wird aus dem Hobbock.
+  // Von jedem Glas führt der Weg damit rückwärts bis zum einzelnen Volk.
+
+  const TRACHTEN = [
+    'Frühtracht', 'Raps', 'Obstblüte', 'Löwenzahn', 'Robinie (Akazie)', 'Linde',
+    'Sommertracht', 'Waldhonig', 'Blütenhonig gemischt', 'Heide', 'Sonnenblume',
+  ];
+
+  const GLASGROESSEN = [30, 125, 250, 500, 1000]; // Gramm Füllmenge
+
+  function emptyErnte() {
+    return {
+      id: uuid(),
+      datum: heute(),        // Entnahme der Waben
+      schleuderdatum: '',    // kann Tage später liegen
+      standId: '',
+      volkIds: [],
+      tracht: '',
+      wassergehalt: null,    // Prozent, Refraktometer
+      wiegungen: [emptyWiegung()],
+      lastModifiedAt: '',
+      schemaVersion: SCHEMA_VERSION,
+    };
+  }
+
+  // Ein Eimer: brutto minus tara. Die Rechnung bleibt im Datensatz sichtbar,
+  // damit sich eine krumme Menge später nachvollziehen lässt.
+  function emptyWiegung() {
+    return { id: uuid(), bezeichnung: '', brutto: null, tara: null };
+  }
+
+  function wiegungNetto(w) {
+    const b = Number(w && w.brutto);
+    const t = Number(w && w.tara);
+    if (!b) return 0;
+    return Math.max(0, Math.round((b - (t || 0)) * 100) / 100);
+  }
+
+  function ernteMenge(e) {
+    return Math.round((e && e.wiegungen ? e.wiegungen : []).reduce((s, w) => s + wiegungNetto(w), 0) * 100) / 100;
+  }
+
+  // Unter 18 % gilt Honig als lagerstabil; darüber droht Gärung. Die Grenze der
+  // Honigverordnung liegt bei 20 %, deshalb zwei Stufen.
+  function wassergehaltBewertung(prozent) {
+    const p = Number(prozent);
+    if (!p) return null;
+    if (p > 20) return { stufe: 'kritisch', text: 'über 20 % — nicht verkehrsfähig' };
+    if (p > 18) return { stufe: 'warnung', text: 'über 18 % — Gärungsgefahr' };
+    return { stufe: 'ok', text: 'lagerstabil' };
+  }
+
+  function emptyGebinde() {
+    return {
+      id: uuid(),
+      nummer: '',
+      bezeichnung: '',
+      kapazitaetKg: null,
+      standort: '',
+      befuellungen: [],   // [{id, ernteId, mengeKg, datum}]
+      notiz: '',
+      lastModifiedAt: '',
+      schemaVersion: SCHEMA_VERSION,
+    };
+  }
+
+  function emptyBefuellung() {
+    return { id: uuid(), ernteId: '', mengeKg: null, datum: heute() };
+  }
+
+  function gebindeGefuellt(g) {
+    return Math.round((g && g.befuellungen ? g.befuellungen : [])
+      .reduce((s, b) => s + (Number(b.mengeKg) || 0), 0) * 100) / 100;
+  }
+
+  function emptyAbfuellung() {
+    return {
+      id: uuid(),
+      losnummer: '',
+      datum: heute(),
+      gebindeId: '',
+      sorte: '',
+      glasGroesseG: 500,
+      anzahlGlaeser: null,
+      mhd: '',
+      notiz: '',
+      lastModifiedAt: '',
+      schemaVersion: SCHEMA_VERSION,
+    };
+  }
+
+  // Abgefüllte Menge in kg — aus Glasgröße und Stückzahl, nicht getrennt erfasst.
+  function abfuellMenge(a) {
+    const g = Number(a && a.glasGroesseG) || 0;
+    const n = Number(a && a.anzahlGlaeser) || 0;
+    return Math.round((g * n / 1000) * 100) / 100;
+  }
+
+  // Wie viel liegt noch im Gebinde? Gefüllt minus alles, was daraus abgefüllt
+  // wurde. Ohne diese Zahl bricht die Kette zwischen Ernte und Glas.
+  function gebindeEntnommen(gebindeId, abfuellungen) {
+    return Math.round((abfuellungen || [])
+      .filter(a => a.gebindeId === gebindeId)
+      .reduce((s, a) => s + abfuellMenge(a), 0) * 100) / 100;
+  }
+
+  function gebindeRest(g, abfuellungen) {
+    return Math.round((gebindeGefuellt(g) - gebindeEntnommen(g.id, abfuellungen)) * 100) / 100;
+  }
+
+  // Losnummer nach Jahr und laufender Nummer: 2026-004 ist die vierte Abfüllung
+  // des Jahres. Vorgeschlagen, damit keine Lücken und Dubletten entstehen —
+  // überschreiben lässt sie sich trotzdem.
+  function losnummerVorschlag(abfuellungen, datum) {
+    const jahr = jahrVon(datum || heute()) || new Date().getFullYear();
+    const praefix = `${jahr}-`;
+    let hoechste = 0;
+    for (const a of (abfuellungen || [])) {
+      const m = String(a.losnummer || '').match(/^(\d{4})-(\d+)$/);
+      if (m && Number(m[1]) === jahr) hoechste = Math.max(hoechste, Number(m[2]));
+    }
+    return praefix + String(hoechste + 1).padStart(3, '0');
+  }
+
+  // Für Honig sind zwei Jahre Mindesthaltbarkeit üblich.
+  function mhdVorschlag(datum) {
+    const d = new Date((datum || heute()) + 'T00:00:00');
+    if (isNaN(d)) return '';
+    d.setFullYear(d.getFullYear() + 2);
+    return dateToIso(d);
+  }
+
+  // Rückverfolgung: von der Abfüllcharge über das Gebinde und dessen Befüllungen
+  // zu den Ernten und von dort zu den Völkern. Das ist der Kern des Moduls —
+  // die Antwort auf „woher stammt dieses Glas?".
+  function chargenHerkunft(abfuellung, gebinde, ernten) {
+    const g = (gebinde || []).find(x => x.id === (abfuellung && abfuellung.gebindeId)) || null;
+    if (!g) return { gebinde: null, posten: [], volkIds: [], trachten: [] };
+    const posten = [];
+    const volkIds = new Set();
+    const trachten = new Set();
+    for (const b of (g.befuellungen || [])) {
+      const e = (ernten || []).find(x => x.id === b.ernteId);
+      posten.push({ befuellung: b, ernte: e || null });
+      if (e) {
+        for (const id of (e.volkIds || [])) volkIds.add(id);
+        if (e.tracht) trachten.add(e.tracht);
+      }
+    }
+    return { gebinde: g, posten, volkIds: [...volkIds], trachten: [...trachten] };
+  }
+
+  // Anteil einer Ernte an einem Gebinde — für die Angabe, wie stark ein Volk in
+  // einer Charge vertreten ist. Ohne Befüllungen ist die Frage nicht zu
+  // beantworten, dann null.
+  function ernteAnteil(gebinde, ernteId) {
+    const gesamt = gebindeGefuellt(gebinde);
+    if (!gesamt) return null;
+    const anteil = (gebinde.befuellungen || [])
+      .filter(b => b.ernteId === ernteId)
+      .reduce((s, b) => s + (Number(b.mengeKg) || 0), 0);
+    return Math.round((anteil / gesamt) * 1000) / 10; // Prozent, eine Nachkommastelle
+  }
+
+  // ---------------------------------------------------------------------------
   // Abgeleitete Sichten aufs Volk
   // ---------------------------------------------------------------------------
   function volkBezeichnung(v) {
@@ -399,13 +568,20 @@
       .sort((a, b) => String(b.datum || '').localeCompare(String(a.datum || '')));
   }
 
-  // Läuft für dieses Volk gerade eine Wartezeit? Dann darf nicht geerntet
-  // werden — das Honigmodul wird das später abfragen.
+  // Lag der Stichtag INNERHALB einer Wartezeit dieses Volkes? Dann darf der an
+  // diesem Tag geerntete Honig nicht in den Verkehr.
+  //
+  // Beide Grenzen prüfen: Die Anwendung muss am Stichtag schon erfolgt sein
+  // (`b.datum <= tag`) UND die Wartezeit noch laufen (`tag <= bis`). Ohne die
+  // erste Bedingung meldet eine Behandlung im Juni auch für eine Ernte im Mai
+  // eine Sperre — beim Stichtag „heute" fällt das nicht auf, beim Rückblick auf
+  // eine zurückliegende Ernte sehr wohl.
   function offeneWartezeit(behandlungen, volkId, stichtag) {
     const tag = stichtag || heute();
     let bis = '';
     for (const b of massnahmenFuerVolk(behandlungen, volkId)) {
       if (b.art !== 'behandlung') continue;
+      if (!b.datum || b.datum > tag) continue;
       const w = wartezeitBis(b);
       if (w && w >= tag && w > bis) bis = w;
     }
@@ -423,6 +599,11 @@
     BEHANDLUNG_ART, DIAGNOSE_METHODEN, PRAEPARATE, ANWENDUNGSARTEN,
     emptyBehandlung, milbenProTag, milbenBewertung, wartezeitBis,
     FUTTERARTEN, FUETTERUNG_ANLASS, emptyFuetterung, fuetterungGesamt,
+    TRACHTEN, GLASGROESSEN,
+    emptyErnte, emptyWiegung, wiegungNetto, ernteMenge, wassergehaltBewertung,
+    emptyGebinde, emptyBefuellung, gebindeGefuellt, gebindeEntnommen, gebindeRest,
+    emptyAbfuellung, abfuellMenge, losnummerVorschlag, mhdVorschlag,
+    chargenHerkunft, ernteAnteil,
     volkBezeichnung, durchsichtenSortiert, letzteDurchsicht, tageSeitDurchsicht,
     durchsichtFaellig, aktuellerStandId, voelkerAmStand, massnahmenFuerVolk, offeneWartezeit,
   };
