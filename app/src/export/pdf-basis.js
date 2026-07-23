@@ -115,10 +115,10 @@
 
         const kopfZeichnen = () => {
           this.platz(zh + 2);
-          doc.setFillColor(245, 236, 214);
+          doc.setFillColor(238, 242, 247);
           doc.rect(this.links, this.y - 3.6, this.nutzbreite, zh, 'F');
           doc.setFont('helvetica', 'bold'); doc.setFontSize(8.5);
-          doc.setTextColor(60, 45, 10);
+          doc.setTextColor(36, 65, 104);
           let x = this.links + 1;
           kopf.forEach((h, i) => { doc.text(String(h), x, this.y); x += b[i]; });
           this.y += zh;
@@ -154,7 +154,7 @@
     const imkerei = (IM.store.getSettings().imkerei) || {};
     ctx.doc.setFont('helvetica', 'bold');
     ctx.doc.setFontSize(16);
-    ctx.doc.setTextColor(120, 85, 10);
+    ctx.doc.setTextColor(44, 82, 130);
     ctx.doc.text(String(titel), ctx.links, ctx.y);
 
     ctx.doc.setFont('helvetica', 'normal');

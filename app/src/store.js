@@ -84,8 +84,25 @@
     for (const d of v.durchsichten) {
       if (!Array.isArray(d.arbeiten)) d.arbeiten = [];
       if (!Array.isArray(d.fotoIds)) d.fotoIds = [];
+      migriereSanftmut(d);
     }
     return v;
+  }
+
+  // Sanftmut lief bis Schema-Version 1 auf 1–5 mit 5 = sehr sanft. Seit
+  // Version 2 ist es eine Schulnote 1–6 mit 1 = sehr friedlich, also umgekehrt
+  // gerichtet. Ohne Umrechnung würde aus dem sanftesten Volk das stechlustigste.
+  // 6 − alt bildet die alte Skala richtig ab: 5→1, 4→2, 3→3, 2→4, 1→5.
+  //
+  // Die Umrechnung hängt am Versionsstempel des Eintrags, nicht am Wert — sie
+  // greift also genau einmal, egal wie oft geladen wird, und landet in der
+  // Datenbank, sobald das Volk das nächste Mal gespeichert wird.
+  function migriereSanftmut(d) {
+    if ((d.schemaVersion || 1) >= 2) return;
+    if (d.sanftmut !== null && d.sanftmut !== undefined && d.sanftmut !== '') {
+      d.sanftmut = 6 - Number(d.sanftmut);
+    }
+    d.schemaVersion = 2;
   }
 
   function migrateMassnahme(m) {

@@ -340,6 +340,25 @@
   }
 
   // --- Durchsichten (die eigentliche Stockkarte) ----------------------------
+  // Die Durchsichten stehen als Tabelle — so vergleicht man die Saison Zeile für
+  // Zeile, statt Blöcke zu lesen. In der Tabelle nur die wichtigsten Punkte;
+  // Arbeiten, Notiz und Fotos hängen als Zusatzzeile darunter, wenn es sie gibt.
+  const DS_SPALTEN = [
+    { kopf: 'Datum', wert: d => formatDatum(d.datum), klasse: 'ds-sp-datum' },
+    { kopf: 'Stärke', wert: d => d.volksstaerke ? `${d.volksstaerke}/5` : '' },
+    { kopf: 'Gassen', wert: d => d.besetzteWabengassen ?? '' },
+    { kopf: 'Brutbild', wert: d => d.brutbild || '' },
+    { kopf: 'Weiselzellen', wert: d => d.weiselzellen || '' },
+    { kopf: 'Sanftmut', wert: d => models.sanftmutKurz(d.sanftmut) },
+    { kopf: 'Zargen', wert: d => d.zargen ?? '' },
+    {
+      kopf: 'Waben G/B/F',
+      wert: d => [d.wabenGesamt, d.wabenBrut, d.wabenFutter].some(x => x != null)
+        ? `${d.wabenGesamt ?? '–'}/${d.wabenBrut ?? '–'}/${d.wabenFutter ?? '–'}` : '',
+    },
+    { kopf: 'Futter', wert: d => d.futter || '' },
+  ];
+
   function durchsichtenKarte(v, refresh) {
     const liste = models.durchsichtenSortiert(v); // jüngste zuerst
     const inhalt = el('div', {});
@@ -347,7 +366,20 @@
     if (!liste.length) {
       inhalt.appendChild(leer('Noch keine Durchsicht erfasst.'));
     } else {
-      for (const d of liste) inhalt.appendChild(durchsichtZeile(v, d, refresh));
+      const tab = el('table', { class: 'ds-tabelle' });
+      const kopfZeile = el('tr', {});
+      for (const sp of DS_SPALTEN) kopfZeile.appendChild(el('th', { class: sp.klasse || null }, sp.kopf));
+      kopfZeile.appendChild(el('th', { class: 'ds-sp-aktion' }, ''));
+      tab.appendChild(el('thead', {}, kopfZeile));
+
+      const body = el('tbody', {});
+      for (const d of liste) {
+        for (const tr of durchsichtZeilen(v, d, refresh)) body.appendChild(tr);
+      }
+      tab.appendChild(body);
+      // Auf dem Handy passt die Tabelle nicht in die Breite — sie scrollt in
+      // ihrem eigenen Kasten, damit nicht die ganze Seite verrutscht.
+      inhalt.appendChild(el('div', { class: 'tabelle-scroll' }, tab));
     }
 
     return karte(`Stockkarte — Durchsichten (${liste.length})`, inhalt, {
@@ -357,43 +389,47 @@
     });
   }
 
-  function durchsichtZeile(v, d, refresh) {
+  function durchsichtZeilen(v, d, refresh) {
     const fotos = store.listVolkFotos(v.id).filter(f => f.kind === 'ds_' + d.id);
+    const warnung = (d.weiselzellen && d.weiselzellen !== 'keine') || d.futter === 'Notfütterung nötig';
 
-    const kopf = el('div', { class: 'ds-kopf' }, [
-      el('strong', {}, formatDatum(d.datum)),
-      d.volksstaerke ? el('span', { class: 'badge' }, `Stärke ${d.volksstaerke}/5`) : null,
-      d.weiselzellen && d.weiselzellen !== 'keine' ? el('span', { class: 'badge badge-warn' }, d.weiselzellen) : null,
-      d.futter === 'Notfütterung nötig' ? el('span', { class: 'badge badge-warn' }, 'Futter knapp') : null,
-      el('span', { class: 'spacer' }),
-      el('button', { class: 'btn btn-sm', onclick: () => durchsichtBearbeiten(v, d, refresh) }, 'Bearbeiten'),
-    ]);
+    const tr = el('tr', {
+      class: 'ds-zeile' + (warnung ? ' ds-zeile-warn' : ''),
+      onclick: () => durchsichtBearbeiten(v, d, refresh),
+    });
+    for (const sp of DS_SPALTEN) {
+      tr.appendChild(el('td', { class: sp.klasse || null }, String(sp.wert(d) ?? '')));
+    }
+    tr.appendChild(el('td', { class: 'ds-sp-aktion' },
+      el('button', {
+        class: 'btn btn-sm',
+        onclick: (e) => { e.stopPropagation(); durchsichtBearbeiten(v, d, refresh); },
+      }, 'Bearbeiten')));
 
-    const werte = [];
-    const push = (label, wert) => { if (wert !== null && wert !== undefined && wert !== '' ) werte.push(`${label}: ${wert}`); };
-    push('Brutbild', d.brutbild);
-    push('Stifte', d.stifteGesehen ? 'ja' : null);
-    push('Königin gesehen', d.koeniginGesehen ? 'ja' : null);
-    push('Sanftmut', d.sanftmut ? d.sanftmut + '/5' : null);
-    push('Wabensitz', d.wabensitz ? d.wabensitz + '/5' : null);
-    push('Wabengassen', d.besetzteWabengassen);
-    push('Zargen', d.zargen);
-    push('Waben (ges./Brut/Futter)', [d.wabenGesamt, d.wabenBrut, d.wabenFutter].some(x => x != null)
-      ? `${d.wabenGesamt ?? '–'}/${d.wabenBrut ?? '–'}/${d.wabenFutter ?? '–'}` : null);
-    push('Futter', d.futter);
-    push('Stimmung', d.stimmung);
-    push('Wetter', d.wetter);
+    const zeilen = [tr];
 
-    const body = el('div', { class: 'ds-body' }, [
-      werte.length ? el('p', { class: 'ds-werte' }, werte.join(' · ')) : null,
-      (d.arbeiten || []).length ? el('div', { class: 'chips chips-statisch' },
-        d.arbeiten.map(a => el('span', { class: 'chip chip-aktiv' }, a))) : null,
-      d.notiz ? el('p', { class: 'ds-notiz' }, d.notiz) : null,
-      fotos.length ? el('div', { class: 'foto-reihe' }, fotos.map(f =>
-        el('img', { class: 'foto-thumb', src: store.volkFotoUrl(f.id), alt: 'Foto', loading: 'lazy' }))) : null,
-    ]);
+    // Zusatzangaben nur zeigen, wenn es sie gibt — sonst bläht sich die Tabelle
+    // mit leeren Zeilen auf.
+    const zusatz = [];
+    if (d.wetter) zusatz.push(`Wetter: ${d.wetter}`);
+    if (d.stifteGesehen) zusatz.push('Stifte gesehen');
+    if (d.koeniginGesehen) zusatz.push('Königin gesehen');
+    if (d.wabensitz) zusatz.push(`Wabensitz ${d.wabensitz}/5`);
+    if (d.stimmung) zusatz.push(`Stimmung: ${d.stimmung}`);
 
-    return el('div', { class: 'ds-eintrag' }, [kopf, body]);
+    if (zusatz.length || (d.arbeiten || []).length || d.notiz || fotos.length) {
+      const zelle = el('td', { colspan: String(DS_SPALTEN.length + 1) }, [
+        zusatz.length ? el('div', { class: 'ds-zusatz' }, zusatz.join(' · ')) : null,
+        (d.arbeiten || []).length ? el('div', { class: 'chips chips-statisch' },
+          d.arbeiten.map(a => el('span', { class: 'chip chip-aktiv' }, a))) : null,
+        d.notiz ? el('div', { class: 'ds-notiz' }, d.notiz) : null,
+        fotos.length ? el('div', { class: 'foto-reihe' }, fotos.map(f =>
+          el('img', { class: 'foto-thumb', src: store.volkFotoUrl(f.id), alt: 'Foto', loading: 'lazy' }))) : null,
+      ]);
+      zeilen.push(el('tr', { class: 'ds-detailzeile' }, zelle));
+    }
+
+    return zeilen;
   }
 
   function durchsichtBearbeiten(v, original, refresh) {
@@ -468,7 +504,7 @@
         feld('Weiselzellen', select(models.WEISELZELLEN, d.weiselzellen, val => d.weiselzellen = val)),
         feld('Stifte gesehen', el('input', { type: 'checkbox', class: 'chk', checked: !!d.stifteGesehen, onchange: e => d.stifteGesehen = e.target.checked })),
         feld('Königin gesehen', el('input', { type: 'checkbox', class: 'chk', checked: !!d.koeniginGesehen, onchange: e => d.koeniginGesehen = e.target.checked })),
-        feld('Sanftmut', select(models.SKALA_SANFTMUT.map(s => ({ wert: s.wert, label: s.label })), d.sanftmut, val => d.sanftmut = val ? Number(val) : null)),
+        feld('Sanftmut (Schulnote)', select(models.SANFTMUT_NOTEN.map(s => ({ wert: s.wert, label: s.label })), d.sanftmut, val => d.sanftmut = val ? Number(val) : null)),
         feld('Wabensitz', select(models.SKALA.map(s => ({ wert: s.wert, label: s.label })), d.wabensitz, val => d.wabensitz = val ? Number(val) : null)),
         feld('Zargen', num('zargen', { min: 0, max: 6 })),
         feld('Waben gesamt', num('wabenGesamt', { min: 0, max: 60 })),

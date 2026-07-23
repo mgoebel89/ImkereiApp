@@ -1,23 +1,25 @@
-/* Imkereiverwaltung — Designsprache der Gemeindeverwaltung mit Honig-Akzent.
+/* Imkereiverwaltung — Designsprache UND Farben der Gemeindeverwaltung.
    Alles ist von vornherein für Handy UND Desktop gebaut: die Erfassung passiert
    am Bienenstand auf dem Telefon, die Auswertung daheim am Rechner. */
 
+/* Farbwerte 1:1 aus der Gemeindeverwaltung — beide Anwendungen sollen sich
+   gleich anfühlen. */
 :root {
-  --akzent: #c8880d;
-  --akzent-dunkel: #a9750a;
-  --akzent-hell: #f6c445;
-  --akzent-blass: #fdf6e4;
-  --bg: #f5f4f1;
+  --akzent: #2c5282;
+  --akzent-dunkel: #244168;
+  --akzent-hell: #4a7ab5;
+  --akzent-blass: #eef2f7;
+  --bg: #f6f7f9;
   --flaeche: #ffffff;
-  --rand: #e2ded6;
-  --text: #23201b;
-  --text-schwach: #6f6a60;
-  --gruen: #2f9e44;
-  --rot: #d64545;
-  --orange: #e08a1e;
-  --radius: 10px;
-  --schatten: 0 1px 3px rgba(0, 0, 0, .07), 0 1px 2px rgba(0, 0, 0, .04);
-  --sidebar-breite: 232px;
+  --rand: #e3e6ea;
+  --text: #1d2129;
+  --text-schwach: #6b7280;
+  --gruen: #2f855a;
+  --rot: #c53030;
+  --orange: #b7791f;
+  --radius: 8px;
+  --schatten: 0 1px 2px rgba(0, 0, 0, .04), 0 4px 12px rgba(0, 0, 0, .04);
+  --sidebar-breite: 244px;
 }
 
 * { box-sizing: border-box; }
@@ -43,8 +45,8 @@ a { color: var(--akzent-dunkel); }
 .sidebar {
   width: var(--sidebar-breite);
   flex: 0 0 var(--sidebar-breite);
-  background: #2b2721;
-  color: #e8e3d9;
+  background: var(--flaeche);
+  border-right: 1px solid var(--rand);
   display: flex;
   flex-direction: column;
   position: sticky;
@@ -54,44 +56,47 @@ a { color: var(--akzent-dunkel); }
 
 .sidebar-head {
   display: flex; align-items: center; gap: 10px;
-  padding: 14px 12px;
-  border-bottom: 1px solid rgba(255, 255, 255, .08);
+  padding: 14px 14px 12px;
+  border-bottom: 1px solid var(--rand);
 }
-.brand-logo { width: 32px; height: 32px; flex: 0 0 auto; }
-.sidebar-brand h1 { font-size: 1.05rem; color: #fff; }
-.sidebar-brand small { color: #a89f8e; font-size: .75rem; }
+.brand-logo { width: 34px; height: 34px; flex: 0 0 auto; }
+.sidebar-brand { flex: 1; min-width: 0; }
+.sidebar-brand h1 { font-size: 1.02rem; }
+.sidebar-brand small { color: var(--text-schwach); font-size: .75rem; }
 .sidebar-collapse {
-  margin-left: auto; background: none; border: 0; color: #a89f8e;
-  font-size: 1.1rem; cursor: pointer; padding: 4px 6px;
+  border: 1px solid var(--rand); background: #fff; color: var(--text-schwach);
+  width: 26px; height: 26px; border-radius: 6px; cursor: pointer;
+  flex: 0 0 auto; line-height: 1; padding: 0;
 }
 
 .sidebar-nav { flex: 1; overflow-y: auto; padding: 10px 8px; }
 .nav-group-label {
-  font-size: .7rem; text-transform: uppercase; letter-spacing: .07em;
-  color: #8b8271; padding: 12px 10px 4px;
+  font-size: .7rem; text-transform: uppercase; letter-spacing: .05em;
+  color: var(--text-schwach); padding: 12px 10px 4px; font-weight: 600;
 }
 .nav-item {
   display: flex; align-items: center; gap: 10px;
-  padding: 9px 10px; border-radius: 8px;
-  color: #ddd6c8; text-decoration: none; font-size: .93rem;
+  padding: 8px 10px; border-radius: 7px;
+  color: var(--text); text-decoration: none; font-size: .92rem;
 }
-.nav-item:hover { background: rgba(255, 255, 255, .06); }
-.nav-item.active { background: var(--akzent); color: #241c07; font-weight: 600; }
-.nav-icon svg { width: 19px; height: 19px; fill: none; stroke: currentColor; display: block; }
+.nav-item:hover { background: var(--akzent-blass); }
+.nav-item.active { background: var(--akzent); color: #fff; }
+.nav-icon svg { width: 20px; height: 20px; fill: none; stroke: currentColor; display: block; }
 .nav-spacer { margin-top: auto; padding-top: 10px; }
 
-.sidebar-foot { padding: 10px; border-top: 1px solid rgba(255, 255, 255, .08); }
+.sidebar-foot { padding: 10px; border-top: 1px solid var(--rand); }
 .sync-status {
   display: flex; align-items: center; gap: 8px; width: 100%;
-  background: rgba(255, 255, 255, .05); border: 0; border-radius: 8px;
-  padding: 8px 10px; color: #cfc7b8; font-size: .82rem; cursor: pointer;
+  background: var(--flaeche); border: 1px solid var(--rand); border-radius: 999px;
+  padding: 6px 12px; color: var(--text-schwach); font-size: .82rem; cursor: pointer;
   text-align: left;
 }
-.sync-dot { width: 8px; height: 8px; border-radius: 50%; background: #777; flex: 0 0 auto; }
+.sync-status:hover { background: var(--akzent-blass); }
+.sync-dot { width: 8px; height: 8px; border-radius: 50%; background: #9ca3af; flex: 0 0 auto; }
 .sync-status--ok .sync-dot { background: var(--gruen); }
 .sync-status--syncing .sync-dot { background: var(--akzent-hell); }
 .sync-status--error .sync-dot { background: var(--rot); }
-.sync-status--unconfigured .sync-dot { background: #6b6455; }
+.sync-status--unconfigured .sync-dot { background: #9ca3af; }
 
 .content-area { flex: 1; min-width: 0; display: flex; flex-direction: column; }
 main {
@@ -156,12 +161,12 @@ main {
   cursor: pointer; text-decoration: none;
   min-height: 40px; /* Daumenfläche am Handy */
 }
-.btn:hover { background: #faf8f4; border-color: #cfc9bd; }
+.btn:hover { background: var(--akzent-blass); border-color: #cdd5df; }
 .btn:disabled { opacity: .55; cursor: default; }
-.btn-primary { background: var(--akzent); border-color: var(--akzent-dunkel); color: #241c07; font-weight: 600; }
-.btn-primary:hover { background: var(--akzent-hell); }
-.btn-danger { color: var(--rot); border-color: #eccaca; }
-.btn-danger:hover { background: #fdf2f2; }
+.btn-primary { background: var(--akzent); border-color: var(--akzent); color: #fff; }
+.btn-primary:hover { background: var(--akzent-dunkel); border-color: var(--akzent-dunkel); }
+.btn-danger { color: var(--rot); border-color: #f1c6c6; }
+.btn-danger:hover { background: #fdf1f1; }
 .btn-sm { padding: 5px 10px; font-size: .84rem; min-height: 34px; }
 .btn-reihe { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 12px; }
 
@@ -212,7 +217,7 @@ textarea.inp { resize: vertical; min-height: 70px; }
 /* --------------------------------------------------------------------- Listen */
 .liste { list-style: none; margin: 0; padding: 0; }
 .liste li {
-  padding: 7px 0; border-bottom: 1px solid #f0ede7;
+  padding: 7px 0; border-bottom: 1px solid #eef0f3;
   display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
 }
 .liste li:last-child { border-bottom: 0; }
@@ -220,7 +225,7 @@ textarea.inp { resize: vertical; min-height: 70px; }
 .liste-num li { margin-bottom: 5px; }
 
 .daten { margin: 0; }
-.daten-zeile { display: flex; gap: 10px; padding: 5px 0; border-bottom: 1px solid #f4f1eb; }
+.daten-zeile { display: flex; gap: 10px; padding: 5px 0; border-bottom: 1px solid #eef0f3; }
 .daten-zeile:last-child { border-bottom: 0; }
 .daten dt { flex: 0 0 40%; max-width: 190px; color: var(--text-schwach); font-size: .87rem; margin: 0; }
 .daten dd { margin: 0; flex: 1; }
@@ -229,7 +234,7 @@ textarea.inp { resize: vertical; min-height: 70px; }
 .aufklapp summary { cursor: pointer; color: var(--akzent-dunkel); font-size: .9rem; }
 
 .log {
-  background: #faf8f4; border: 1px solid var(--rand); border-radius: 8px;
+  background: #f6f7f9; border: 1px solid var(--rand); border-radius: 8px;
   padding: 10px; margin-top: 12px; font-size: .82rem;
   white-space: pre-wrap; word-break: break-word; max-height: 220px; overflow: auto;
 }
@@ -276,22 +281,22 @@ textarea.inp { resize: vertical; min-height: 70px; }
 
 /* Ampeln und Marken */
 .ampel { font-size: .84rem; padding: 4px 9px; border-radius: 6px; display: inline-block; }
-.ampel-ok { background: #eef8ef; color: #24632f; }
-.ampel-bald { background: #fdf4e3; color: #8a5f08; }
-.ampel-faellig, .ampel-warnung { background: #fdeeee; color: #97292c; }
-.ampel-offen { background: #f1efeb; color: var(--text-schwach); }
+.ampel-ok { background: #e8f5ee; color: #276749; }
+.ampel-bald { background: #fdf3e2; color: #975a16; }
+.ampel-faellig, .ampel-warnung { background: #fdecec; color: #9b2c2c; }
+.ampel-offen { background: #eef0f3; color: var(--text-schwach); }
 
 .tag {
-  font-size: .74rem; background: #efece6; color: var(--text-schwach);
+  font-size: .74rem; background: #eef0f3; color: var(--text-schwach);
   padding: 2px 8px; border-radius: 999px;
 }
 .badge {
   font-size: .76rem; background: var(--akzent-blass); color: var(--akzent-dunkel);
   padding: 2px 8px; border-radius: 999px; white-space: nowrap;
 }
-.badge-warn, .badge-warnung { background: #fdf0e0; color: #91520a; }
-.badge-kritisch { background: #fdeeee; color: #97292c; }
-.badge-ok { background: #eef8ef; color: #24632f; }
+.badge-warn, .badge-warnung { background: #fdf3e2; color: #975a16; }
+.badge-kritisch { background: #fdecec; color: #9b2c2c; }
+.badge-ok { background: #e8f5ee; color: #276749; }
 
 .kennzahl {
   background: var(--akzent-blass); border-radius: 8px; padding: 10px 12px;
@@ -299,14 +304,37 @@ textarea.inp { resize: vertical; min-height: 70px; }
 }
 
 /* ------------------------------------------------------------- Durchsichten */
-.ds-eintrag { border-left: 3px solid var(--akzent-hell); padding: 4px 0 10px 12px; margin-bottom: 12px; }
-.ds-kopf { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 5px; }
-.ds-werte { font-size: .88rem; color: #4a453c; margin: 4px 0; }
-.ds-notiz { margin: 6px 0; white-space: pre-wrap; }
+/* Breite Tabellen scrollen in ihrem eigenen Kasten — die Seite selbst darf
+   niemals quer scrollen, sonst verliert man auf dem Handy die Navigation. */
+.tabelle-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 0 -4px; }
 
-.eintrag { padding: 11px 0; border-bottom: 1px solid #f0ede7; cursor: pointer; }
+.ds-tabelle { border-collapse: collapse; width: 100%; min-width: 720px; font-size: .87rem; }
+.ds-tabelle th {
+  text-align: left; font-size: .74rem; text-transform: uppercase; letter-spacing: .03em;
+  color: var(--text-schwach); font-weight: 600;
+  padding: 6px 8px; border-bottom: 1px solid var(--rand); white-space: nowrap;
+  background: var(--akzent-blass); position: sticky; top: 0;
+}
+.ds-tabelle td { padding: 7px 8px; border-bottom: 1px solid #eef0f3; vertical-align: top; }
+.ds-zeile { cursor: pointer; }
+.ds-zeile:hover td { background: var(--akzent-blass); }
+/* Schwarmzellen oder Futternot: die Zeile muss auffallen, ohne zu schreien. */
+.ds-zeile-warn td { box-shadow: inset 3px 0 0 var(--rot); }
+.ds-sp-datum { white-space: nowrap; font-weight: 600; }
+.ds-sp-aktion { text-align: right; white-space: nowrap; }
+
+.ds-detailzeile td {
+  padding: 2px 8px 12px 8px; border-bottom: 1px solid var(--rand);
+  color: var(--text-schwach);
+}
+.ds-zusatz { font-size: .84rem; margin-bottom: 6px; }
+.ds-detailzeile .chips { margin-bottom: 6px; }
+.ds-detailzeile .chip { font-size: .78rem; padding: 3px 9px; }
+.ds-notiz { margin: 4px 0; white-space: pre-wrap; color: var(--text); font-size: .88rem; }
+
+.eintrag { padding: 11px 0; border-bottom: 1px solid #eef0f3; cursor: pointer; }
 .eintrag:last-child { border-bottom: 0; }
-.eintrag:hover { background: #fbfaf7; }
+.eintrag:hover { background: #f6f7f9; }
 .eintrag-kopf { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; }
 
 /* Volk-Mehrfachauswahl (Behandlungen) */
@@ -319,7 +347,7 @@ textarea.inp { resize: vertical; min-height: 70px; }
   background: var(--flaeche); font-family: inherit; font-size: .86rem;
   cursor: pointer; min-height: 44px;
 }
-.volk-chip.aktiv { background: var(--akzent); border-color: var(--akzent-dunkel); color: #241c07; font-weight: 600; }
+.volk-chip.aktiv { background: var(--akzent); border-color: var(--akzent-dunkel); color: #fff; }
 
 /* -------------------------------------------------------------------- Fotos */
 .foto-pick { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
@@ -381,13 +409,13 @@ textarea.inp { resize: vertical; min-height: 70px; }
 .modal-body { padding: 16px 18px; overflow-y: auto; flex: 1; }
 .modal-foot {
   display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
-  padding: 12px 18px; border-top: 1px solid var(--rand); background: #fbfaf7;
+  padding: 12px 18px; border-top: 1px solid var(--rand); background: #f6f7f9;
   border-radius: 0 0 12px 12px;
 }
 
 .toast {
   position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%);
-  background: #2b2721; color: #fff; padding: 11px 18px; border-radius: 8px;
+  background: #1d2129; color: #fff; padding: 11px 18px; border-radius: 8px;
   font-size: .9rem; z-index: 200; box-shadow: 0 4px 16px rgba(0, 0, 0, .25);
   max-width: 90vw; text-align: center;
 }
@@ -410,14 +438,14 @@ textarea.inp { resize: vertical; min-height: 70px; }
 
   .mobile-bar {
     display: flex; align-items: center; gap: 10px;
-    background: #2b2721; color: #fff;
-    padding: 10px 12px;
+    background: var(--flaeche); border-bottom: 1px solid var(--rand);
+    padding: 10px 14px;
     padding-top: calc(10px + env(safe-area-inset-top));
     position: sticky; top: 0; z-index: 60;
   }
   .menu-toggle {
-    background: none; border: 0; color: #fff;
-    font-size: 1.35rem; cursor: pointer; padding: 2px 6px;
+    border: 1px solid var(--rand); background: #fff; border-radius: 7px;
+    color: var(--text); font-size: 1.15rem; cursor: pointer; padding: 3px 9px;
   }
   .mobile-logo { width: 26px; height: 26px; }
   .mobile-title { font-size: 1rem; font-weight: 600; }

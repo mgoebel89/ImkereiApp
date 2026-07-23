@@ -172,8 +172,22 @@ in der Historie des Volkes ab, statt sie zu überschreiben.
 Wabengassen, Brutbild, Stiften, Weiselzellen, Sanftmut, Wabensitz, Zargen- und
 Wabenzahlen, Futtereinschätzung, Stimmung, durchgeführten Arbeiten (Mehrfachauswahl
 aus 16 Standardhandgriffen), Notiz und Fotos. Beim Anlegen werden Zargen- und
-Wabenzahl aus der letzten Durchsicht vorbelegt. Alle Skalen laufen 1–5 und sind
-gleich gerichtet: 5 ist immer gut.
+Wabenzahl aus der letzten Durchsicht vorbelegt.
+
+Die Durchsichten stehen **als Tabelle** — eine Zeile je Termin mit den wichtigsten
+Punkten, sodass sich die Saison Zeile für Zeile vergleichen lässt. Arbeiten, Notiz
+und Fotos hängen als Zusatzzeile darunter, wenn es sie gibt. Auf dem Handy scrollt
+die Tabelle in ihrem eigenen Kasten; die Seite selbst bleibt stehen.
+
+**Skalen.** Volksstärke und Wabensitz laufen 1–5, wobei 5 gut ist. **Sanftmut ist
+eine deutsche Schulnote 1–6: 1 sehr friedlich, 6 stechlustig** — läuft also
+andersherum. Damit das nie zweideutig wird, steht in Tabelle und PDF immer
+„Note x" statt einer nackten Ziffer, und das PDF trägt die Legende unter der
+Tabelle.
+
+> Bestandsdaten aus der Zeit vor dieser Änderung (Sanftmut 1–5, 5 = sanft) rechnet
+> die App beim Laden automatisch um (`6 − alt`). Die Umrechnung hängt am
+> Versionsstempel des Eintrags, greift also genau einmal.
 
 **Standortwechsel** — Wanderungen mit Datum und Zielstand; der aktuelle Standort
 ergibt sich aus dem jüngsten Eintrag.
@@ -195,11 +209,12 @@ gefütterten Völker wird laufend mitgerechnet.
 
 **PDF-Ausgaben**
 
-- *Stockkarte* — ein Dokument je Volk und Saison. Stammdaten, Königin,
-  Standortwechsel, alle Durchsichten **aufsteigend** (eine ausgedruckte Karte liest
-  man durch die Saison, am Bildschirm steht die jüngste oben), dazu Behandlungen
-  und Fütterungen des Jahres mit Futtersumme. Gibt es mehrere Saisons, fragt die
-  App, welche gedruckt werden soll.
+- *Stockkarte* — ein Dokument je Volk und Saison, im **Querformat**, weil die
+  Durchsichtstabelle sonst zu schmale Spalten bekäme. Stammdaten, Königin,
+  Standortwechsel, alle Durchsichten als Tabelle in **aufsteigender** Reihenfolge
+  (eine ausgedruckte Karte liest man durch die Saison, am Bildschirm steht die
+  jüngste oben), dazu Behandlungen und Fütterungen des Jahres mit Futtersumme.
+  Gibt es mehrere Saisons, fragt die App, welche gedruckt werden soll.
 - *Bestandsbuch* — Nachweis der Tierarzneimittel-Anwendungen eines Jahrgangs im
   Querformat: Datum, Stand, Anzahl behandelter Völker, Arzneimittel und Wirkstoff,
   Charge, Menge, Anwendungsart, Wartezeit und Anwender, dazu die behandelten Völker

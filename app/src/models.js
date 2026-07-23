@@ -131,8 +131,7 @@
   // ---------------------------------------------------------------------------
   // Durchsicht (ein Stockkarten-Eintrag)
   // ---------------------------------------------------------------------------
-  // Die Skalen sind bewusst 1–5 und einheitlich gerichtet: 5 ist immer „gut".
-  // Das erspart beim Blättern durch die Historie das Umdenken.
+  // Volksstärke und Wabensitz laufen 1–5, 5 ist gut.
   const SKALA = [
     { wert: 1, label: '1 – sehr schwach' },
     { wert: 2, label: '2 – schwach' },
@@ -140,13 +139,27 @@
     { wert: 4, label: '4 – gut' },
     { wert: 5, label: '5 – sehr gut' },
   ];
-  const SKALA_SANFTMUT = [
-    { wert: 1, label: '1 – stechlustig' },
-    { wert: 2, label: '2 – unruhig' },
-    { wert: 3, label: '3 – normal' },
-    { wert: 4, label: '4 – ruhig' },
-    { wert: 5, label: '5 – sehr sanft' },
+
+  // Sanftmut dagegen als deutsche SCHULNOTE 1–6: 1 ist sehr friedlich, 6
+  // stechlustig. Die Skala läuft damit bewusst andersherum als die beiden oben —
+  // eine Note liest sich ohne Nachdenken, solange klar ist, dass sie eine Note
+  // ist. Deshalb steht in der Oberfläche und im PDF immer „Note x" dabei.
+  const SANFTMUT_NOTEN = [
+    { wert: 1, label: '1 – sehr friedlich' },
+    { wert: 2, label: '2 – friedlich' },
+    { wert: 3, label: '3 – noch ruhig' },
+    { wert: 4, label: '4 – unruhig' },
+    { wert: 5, label: '5 – aufbrausend' },
+    { wert: 6, label: '6 – stechlustig' },
   ];
+  function sanftmutLabel(note) {
+    const n = SANFTMUT_NOTEN.find(x => x.wert === Number(note));
+    return n ? n.label : '';
+  }
+  // Kurzform für Tabellen: „2" allein wäre mehrdeutig, „Note 2" nicht.
+  function sanftmutKurz(note) {
+    return note ? `Note ${note}` : '';
+  }
 
   const BRUTBILD = ['sehr gut geschlossen', 'gut', 'lückig', 'nur Drohnenbrut', 'keine Brut'];
   const WEISELZELLEN = ['keine', 'Spielnäpfchen', 'Schwarmzellen', 'Nachschaffungszellen', 'drohnenbrütig'];
@@ -174,19 +187,23 @@
     'Beute gereinigt',
   ];
 
+  // schemaVersion 2: Sanftmut ist seither eine Schulnote 1–6 (1 = friedlich).
+  // Version 1 hatte 1–5 mit 5 = sanft — siehe migrateVolk im store.
+  const DURCHSICHT_VERSION = 2;
+
   function emptyDurchsicht() {
     return {
       id: uuid(),
       datum: heute(),
       wetter: '',
-      volksstaerke: null,        // 1–5
+      volksstaerke: null,        // 1–5, 5 = sehr gut
       besetzteWabengassen: null, // konkrete Zahl, falls gezählt
       brutbild: '',
       stifteGesehen: false,
       koeniginGesehen: false,
       weiselzellen: '',
-      sanftmut: null,            // 1–5
-      wabensitz: null,           // 1–5
+      sanftmut: null,            // Schulnote 1–6, 1 = sehr friedlich
+      wabensitz: null,           // 1–5, 5 = sehr gut
       stimmung: '',
       zargen: null,
       wabenGesamt: null,
@@ -196,7 +213,7 @@
       arbeiten: [],
       notiz: '',
       fotoIds: [],
-      schemaVersion: SCHEMA_VERSION,
+      schemaVersion: DURCHSICHT_VERSION,
     };
   }
 
@@ -400,8 +417,9 @@
     dateToIso, heute, jahrVon, saisonVon,
     KOENIGIN_FARBEN, koeniginFarbe, koeniginAlter, KOENIGIN_HERKUNFT,
     VOLK_STATUS, VOLK_STATUS_LABEL, VOLK_HERKUNFT, BEUTENTYPEN, RAHMENMASSE,
-    emptyStand, emptyVolk, emptyKoenigin, emptyDurchsicht,
-    SKALA, SKALA_SANFTMUT, BRUTBILD, WEISELZELLEN, FUTTER, STIMMUNG, ARBEITEN,
+    emptyStand, emptyVolk, emptyKoenigin, emptyDurchsicht, DURCHSICHT_VERSION,
+    SKALA, SANFTMUT_NOTEN, sanftmutLabel, sanftmutKurz,
+    BRUTBILD, WEISELZELLEN, FUTTER, STIMMUNG, ARBEITEN,
     BEHANDLUNG_ART, DIAGNOSE_METHODEN, PRAEPARATE, ANWENDUNGSARTEN,
     emptyBehandlung, milbenProTag, milbenBewertung, wartezeitBis,
     FUTTERARTEN, FUETTERUNG_ANLASS, emptyFuetterung, fuetterungGesamt,
