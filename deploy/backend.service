@@ -1,0 +1,33 @@
+[Unit]
+Description=Imkereiverwaltung Backend (Node + SQLite)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/imkerei/backend
+ExecStart=/usr/bin/node server.js
+Restart=on-failure
+RestartSec=3
+Environment=NODE_ENV=production
+Environment=DATA_DIR=/var/lib/imkerei
+Environment=PORT=3000
+Environment=HOST=127.0.0.1
+# Zugänge zu Paperless-ngx und Homebox gehören in /etc/imkerei.env (root-only, 0600),
+# nicht ins Unit-File. Beide lassen sich alternativ in den App-Einstellungen pflegen —
+# dann liegen sie serverseitig in der SQLite und nicht hier. Inhalt z. B.:
+#   PAPERLESS_URL=http://192.168.1.20:8000
+#   PAPERLESS_TOKEN=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+#   HOMEBOX_URL=http://192.168.1.21:7745
+#   HOMEBOX_TOKEN=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+EnvironmentFile=-/etc/imkerei.env
+
+# Hardening
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ReadWritePaths=/var/lib/imkerei
+ProtectHome=true
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,460 @@
+/* Imkereiverwaltung — Designsprache der Gemeindeverwaltung mit Honig-Akzent.
+   Alles ist von vornherein für Handy UND Desktop gebaut: die Erfassung passiert
+   am Bienenstand auf dem Telefon, die Auswertung daheim am Rechner. */
+
+:root {
+  --akzent: #c8880d;
+  --akzent-dunkel: #a9750a;
+  --akzent-hell: #f6c445;
+  --akzent-blass: #fdf6e4;
+  --bg: #f5f4f1;
+  --flaeche: #ffffff;
+  --rand: #e2ded6;
+  --text: #23201b;
+  --text-schwach: #6f6a60;
+  --gruen: #2f9e44;
+  --rot: #d64545;
+  --orange: #e08a1e;
+  --radius: 10px;
+  --schatten: 0 1px 3px rgba(0, 0, 0, .07), 0 1px 2px rgba(0, 0, 0, .04);
+  --sidebar-breite: 232px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-size: 15px;
+  line-height: 1.45;
+  color: var(--text);
+  background: var(--bg);
+  -webkit-text-size-adjust: 100%;
+}
+
+h1 { font-size: 1.5rem; margin: 0; }
+h2 { font-size: 1.1rem; margin: 0; }
+h3 { font-size: 1rem; margin: 0; }
+a { color: var(--akzent-dunkel); }
+
+/* ---------------------------------------------------------------- Grundgerüst */
+.app-shell { display: flex; min-height: 100vh; }
+
+.sidebar {
+  width: var(--sidebar-breite);
+  flex: 0 0 var(--sidebar-breite);
+  background: #2b2721;
+  color: #e8e3d9;
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+}
+
+.sidebar-head {
+  display: flex; align-items: center; gap: 10px;
+  padding: 14px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, .08);
+}
+.brand-logo { width: 32px; height: 32px; flex: 0 0 auto; }
+.sidebar-brand h1 { font-size: 1.05rem; color: #fff; }
+.sidebar-brand small { color: #a89f8e; font-size: .75rem; }
+.sidebar-collapse {
+  margin-left: auto; background: none; border: 0; color: #a89f8e;
+  font-size: 1.1rem; cursor: pointer; padding: 4px 6px;
+}
+
+.sidebar-nav { flex: 1; overflow-y: auto; padding: 10px 8px; }
+.nav-group-label {
+  font-size: .7rem; text-transform: uppercase; letter-spacing: .07em;
+  color: #8b8271; padding: 12px 10px 4px;
+}
+.nav-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 10px; border-radius: 8px;
+  color: #ddd6c8; text-decoration: none; font-size: .93rem;
+}
+.nav-item:hover { background: rgba(255, 255, 255, .06); }
+.nav-item.active { background: var(--akzent); color: #241c07; font-weight: 600; }
+.nav-icon svg { width: 19px; height: 19px; fill: none; stroke: currentColor; display: block; }
+.nav-spacer { margin-top: auto; padding-top: 10px; }
+
+.sidebar-foot { padding: 10px; border-top: 1px solid rgba(255, 255, 255, .08); }
+.sync-status {
+  display: flex; align-items: center; gap: 8px; width: 100%;
+  background: rgba(255, 255, 255, .05); border: 0; border-radius: 8px;
+  padding: 8px 10px; color: #cfc7b8; font-size: .82rem; cursor: pointer;
+  text-align: left;
+}
+.sync-dot { width: 8px; height: 8px; border-radius: 50%; background: #777; flex: 0 0 auto; }
+.sync-status--ok .sync-dot { background: var(--gruen); }
+.sync-status--syncing .sync-dot { background: var(--akzent-hell); }
+.sync-status--error .sync-dot { background: var(--rot); }
+.sync-status--unconfigured .sync-dot { background: #6b6455; }
+
+.content-area { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+main {
+  padding: 20px 22px 60px;
+  max-width: 1180px;
+  width: 100%;
+}
+
+.mobile-bar { display: none; }
+
+/* eingeklappte Seitenleiste: nur Icons */
+.sidebar-collapsed .sidebar { --sidebar-breite: 58px; }
+.sidebar-collapsed .nav-label,
+.sidebar-collapsed .sidebar-brand,
+.sidebar-collapsed .nav-group-label,
+.sidebar-collapsed .sync-label { display: none; }
+.sidebar-collapsed .sidebar-collapse { transform: rotate(180deg); margin: 0 auto; }
+.sidebar-collapsed .nav-item { justify-content: center; }
+
+.backend-banner {
+  background: var(--rot); color: #fff; padding: 9px 14px;
+  font-size: .88rem; text-align: center;
+}
+
+/* --------------------------------------------------------------------- Karten */
+.card {
+  background: var(--flaeche);
+  border: 1px solid var(--rand);
+  border-radius: var(--radius);
+  box-shadow: var(--schatten);
+  padding: 16px 18px;
+  margin-bottom: 16px;
+}
+.card-head {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+.card-head h2 { margin-right: auto; }
+
+.toolbar {
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+.toolbar h1 { margin-right: auto; }
+
+.filterbar {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+.filterbar .inp { max-width: 240px; }
+
+.spacer { flex: 1; }
+.muted { color: var(--text-schwach); font-size: .9rem; margin: 4px 0; }
+.abschnitt { margin: 18px 0 8px; color: var(--akzent-dunkel); }
+
+/* -------------------------------------------------------------------- Knöpfe */
+.btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--flaeche); color: var(--text);
+  border: 1px solid var(--rand); border-radius: 8px;
+  padding: 8px 14px; font-size: .9rem; font-family: inherit;
+  cursor: pointer; text-decoration: none;
+  min-height: 40px; /* Daumenfläche am Handy */
+}
+.btn:hover { background: #faf8f4; border-color: #cfc9bd; }
+.btn:disabled { opacity: .55; cursor: default; }
+.btn-primary { background: var(--akzent); border-color: var(--akzent-dunkel); color: #241c07; font-weight: 600; }
+.btn-primary:hover { background: var(--akzent-hell); }
+.btn-danger { color: var(--rot); border-color: #eccaca; }
+.btn-danger:hover { background: #fdf2f2; }
+.btn-sm { padding: 5px 10px; font-size: .84rem; min-height: 34px; }
+.btn-reihe { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 12px; }
+
+.link-danger {
+  background: none; border: 0; color: var(--rot);
+  cursor: pointer; font-size: .9rem; padding: 0 4px;
+}
+
+/* ----------------------------------------------------------------- Formulare */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 12px 16px;
+}
+.feld { display: flex; flex-direction: column; gap: 4px; }
+.feld-breit { grid-column: 1 / -1; }
+.feld-label { font-size: .8rem; color: var(--text-schwach); font-weight: 600; }
+
+.inp {
+  width: 100%;
+  padding: 9px 10px;
+  font-size: 16px; /* unter 16px zoomt iOS beim Fokus hinein */
+  font-family: inherit;
+  color: var(--text);
+  background: var(--flaeche);
+  border: 1px solid var(--rand);
+  border-radius: 8px;
+}
+.inp:focus { outline: 2px solid var(--akzent-hell); outline-offset: -1px; border-color: var(--akzent); }
+textarea.inp { resize: vertical; min-height: 70px; }
+
+.chk { width: 22px; height: 22px; accent-color: var(--akzent); }
+.inline-chk { display: inline-flex; align-items: center; gap: 6px; font-size: .9rem; }
+.jahr-zeile { display: flex; align-items: center; gap: 10px; }
+.farb-hinweis { display: inline-flex; align-items: center; gap: 6px; font-size: .85rem; color: var(--text-schwach); white-space: nowrap; }
+
+/* Chips als Mehrfachauswahl */
+.chips { display: flex; flex-wrap: wrap; gap: 7px; }
+.chip {
+  background: var(--flaeche); border: 1px solid var(--rand); border-radius: 999px;
+  padding: 7px 13px; font-size: .85rem; font-family: inherit;
+  cursor: pointer; color: var(--text-schwach);
+}
+.chip:hover { border-color: var(--akzent); }
+.chip-aktiv { background: var(--akzent-blass); border-color: var(--akzent); color: var(--akzent-dunkel); font-weight: 600; }
+.chips-statisch .chip { cursor: default; }
+
+/* --------------------------------------------------------------------- Listen */
+.liste { list-style: none; margin: 0; padding: 0; }
+.liste li {
+  padding: 7px 0; border-bottom: 1px solid #f0ede7;
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+}
+.liste li:last-child { border-bottom: 0; }
+.liste-num { margin: 8px 0 12px; padding-left: 22px; }
+.liste-num li { margin-bottom: 5px; }
+
+.daten { margin: 0; }
+.daten-zeile { display: flex; gap: 10px; padding: 5px 0; border-bottom: 1px solid #f4f1eb; }
+.daten-zeile:last-child { border-bottom: 0; }
+.daten dt { flex: 0 0 40%; max-width: 190px; color: var(--text-schwach); font-size: .87rem; margin: 0; }
+.daten dd { margin: 0; flex: 1; }
+
+.aufklapp { margin-top: 10px; }
+.aufklapp summary { cursor: pointer; color: var(--akzent-dunkel); font-size: .9rem; }
+
+.log {
+  background: #faf8f4; border: 1px solid var(--rand); border-radius: 8px;
+  padding: 10px; margin-top: 12px; font-size: .82rem;
+  white-space: pre-wrap; word-break: break-word; max-height: 220px; overflow: auto;
+}
+.log:empty { display: none; }
+
+/* ------------------------------------------------------------------- Kacheln */
+.kachel-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(228px, 1fr));
+  gap: 14px;
+}
+.kachel {
+  background: var(--flaeche); border: 1px solid var(--rand);
+  border-radius: var(--radius); box-shadow: var(--schatten);
+  padding: 14px; cursor: pointer;
+  display: flex; flex-direction: column; gap: 6px;
+}
+.kachel:hover { border-color: var(--akzent); }
+.kachel-inaktiv { opacity: .6; }
+.kachel-kopf { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.kachel-kopf h3 { margin-right: auto; }
+.kachel-zahlen { display: flex; gap: 16px; margin-top: 4px; }
+.zahl { display: flex; flex-direction: column; }
+.zahl strong { font-size: 1.4rem; line-height: 1.1; }
+.zahl span { font-size: .76rem; color: var(--text-schwach); }
+.zahl-warn strong { color: var(--orange); }
+.kachel-fuss { margin-top: auto; padding-top: 8px; }
+
+.dash-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
+  align-items: start;
+}
+.dash-grid .card { margin-bottom: 0; }
+
+/* Königinnen-Jahresfarbe */
+.koenigin-punkt {
+  width: 14px; height: 14px; border-radius: 50%;
+  border: 1px solid rgba(0, 0, 0, .3); flex: 0 0 auto; display: inline-block;
+}
+.koenigin-punkt-gross { width: 26px; height: 26px; }
+.koenigin-kopf { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+
+/* Ampeln und Marken */
+.ampel { font-size: .84rem; padding: 4px 9px; border-radius: 6px; display: inline-block; }
+.ampel-ok { background: #eef8ef; color: #24632f; }
+.ampel-bald { background: #fdf4e3; color: #8a5f08; }
+.ampel-faellig, .ampel-warnung { background: #fdeeee; color: #97292c; }
+.ampel-offen { background: #f1efeb; color: var(--text-schwach); }
+
+.tag {
+  font-size: .74rem; background: #efece6; color: var(--text-schwach);
+  padding: 2px 8px; border-radius: 999px;
+}
+.badge {
+  font-size: .76rem; background: var(--akzent-blass); color: var(--akzent-dunkel);
+  padding: 2px 8px; border-radius: 999px; white-space: nowrap;
+}
+.badge-warn, .badge-warnung { background: #fdf0e0; color: #91520a; }
+.badge-kritisch { background: #fdeeee; color: #97292c; }
+.badge-ok { background: #eef8ef; color: #24632f; }
+
+.kennzahl {
+  background: var(--akzent-blass); border-radius: 8px; padding: 10px 12px;
+  margin-top: 10px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
+}
+
+/* ------------------------------------------------------------- Durchsichten */
+.ds-eintrag { border-left: 3px solid var(--akzent-hell); padding: 4px 0 10px 12px; margin-bottom: 12px; }
+.ds-kopf { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 5px; }
+.ds-werte { font-size: .88rem; color: #4a453c; margin: 4px 0; }
+.ds-notiz { margin: 6px 0; white-space: pre-wrap; }
+
+.eintrag { padding: 11px 0; border-bottom: 1px solid #f0ede7; cursor: pointer; }
+.eintrag:last-child { border-bottom: 0; }
+.eintrag:hover { background: #fbfaf7; }
+.eintrag-kopf { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; }
+
+/* Volk-Mehrfachauswahl (Behandlungen) */
+.volk-auswahl {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+  gap: 7px; margin-top: 10px;
+}
+.volk-chip {
+  padding: 10px 6px; border: 1px solid var(--rand); border-radius: 8px;
+  background: var(--flaeche); font-family: inherit; font-size: .86rem;
+  cursor: pointer; min-height: 44px;
+}
+.volk-chip.aktiv { background: var(--akzent); border-color: var(--akzent-dunkel); color: #241c07; font-weight: 600; }
+
+/* -------------------------------------------------------------------- Fotos */
+.foto-pick { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+.foto-reihe { display: flex; gap: 8px; flex-wrap: wrap; margin: 8px 0; }
+.foto-kachel { position: relative; }
+.foto-thumb {
+  width: 90px; height: 90px; object-fit: cover;
+  border-radius: 8px; border: 1px solid var(--rand); display: block;
+}
+.foto-weg {
+  position: absolute; top: -6px; right: -6px;
+  width: 24px; height: 24px; border-radius: 50%;
+  background: var(--rot); color: #fff; border: 0; cursor: pointer;
+  font-size: .8rem; line-height: 1;
+}
+
+/* -------------------------------------------------------------------- Reiter */
+.reiter { display: flex; gap: 4px; border-bottom: 1px solid var(--rand); margin-bottom: 16px; }
+.reiter-btn {
+  background: none; border: 0; border-bottom: 3px solid transparent;
+  padding: 10px 14px; font-family: inherit; font-size: .92rem;
+  color: var(--text-schwach); cursor: pointer;
+}
+.reiter-btn.aktiv { color: var(--akzent-dunkel); border-bottom-color: var(--akzent); font-weight: 600; }
+
+/* --------------------------------------------------------------- Einstellungen */
+.settings-layout { display: flex; gap: 20px; align-items: flex-start; }
+.settings-nav { display: flex; flex-direction: column; gap: 3px; flex: 0 0 180px; }
+.settings-nav-btn {
+  text-align: left; background: none; border: 0; border-radius: 8px;
+  padding: 9px 12px; font-family: inherit; font-size: .92rem;
+  color: var(--text-schwach); cursor: pointer;
+}
+.settings-nav-btn.aktiv { background: var(--akzent-blass); color: var(--akzent-dunkel); font-weight: 600; }
+.settings-inhalt { flex: 1; min-width: 0; }
+
+/* --------------------------------------------------------------------- Modal */
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 100;
+  background: rgba(20, 17, 12, .48);
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px;
+}
+.modal {
+  background: var(--flaeche); border-radius: 12px;
+  width: 100%; max-width: 720px; max-height: 90vh;
+  display: flex; flex-direction: column;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, .25);
+}
+.modal-head {
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px 18px; border-bottom: 1px solid var(--rand);
+}
+.modal-head h2 { flex: 1; }
+.modal-close {
+  background: none; border: 0; font-size: 1.2rem;
+  cursor: pointer; color: var(--text-schwach); padding: 4px 8px;
+}
+.modal-body { padding: 16px 18px; overflow-y: auto; flex: 1; }
+.modal-foot {
+  display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
+  padding: 12px 18px; border-top: 1px solid var(--rand); background: #fbfaf7;
+  border-radius: 0 0 12px 12px;
+}
+
+.toast {
+  position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%);
+  background: #2b2721; color: #fff; padding: 11px 18px; border-radius: 8px;
+  font-size: .9rem; z-index: 200; box-shadow: 0 4px 16px rgba(0, 0, 0, .25);
+  max-width: 90vw; text-align: center;
+}
+
+/* ======================================================= Handy und Tablet === */
+@media (max-width: 900px) {
+  .sidebar {
+    position: fixed; z-index: 90; left: 0; top: 0;
+    transform: translateX(-100%);
+    transition: transform .2s ease;
+  }
+  .nav-open .sidebar { transform: translateX(0); }
+  .sidebar-collapse { display: none; }
+
+  .sidebar-backdrop { display: none; }
+  .nav-open .sidebar-backdrop {
+    display: block; position: fixed; inset: 0; z-index: 80;
+    background: rgba(20, 17, 12, .4);
+  }
+
+  .mobile-bar {
+    display: flex; align-items: center; gap: 10px;
+    background: #2b2721; color: #fff;
+    padding: 10px 12px;
+    padding-top: calc(10px + env(safe-area-inset-top));
+    position: sticky; top: 0; z-index: 60;
+  }
+  .menu-toggle {
+    background: none; border: 0; color: #fff;
+    font-size: 1.35rem; cursor: pointer; padding: 2px 6px;
+  }
+  .mobile-logo { width: 26px; height: 26px; }
+  .mobile-title { font-size: 1rem; font-weight: 600; }
+
+  main { padding: 14px 13px 70px; }
+  h1 { font-size: 1.25rem; }
+
+  .form-grid { grid-template-columns: 1fr; }
+  .kachel-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+  .dash-grid { grid-template-columns: 1fr; }
+
+  .daten-zeile { flex-direction: column; gap: 1px; }
+  .daten dt { flex: none; max-width: none; }
+
+  .settings-layout { flex-direction: column; }
+  .settings-nav { flex-direction: row; flex: none; overflow-x: auto; width: 100%; }
+
+  /* Vollflächiges Modal — ein langes Formular ist auf dem Handy sonst nicht
+     bedienbar, und der Rand kostet nur Platz. */
+  .modal-overlay { padding: 0; }
+  .modal {
+    max-width: none; max-height: none;
+    height: 100dvh; border-radius: 0;
+  }
+  .modal-head { padding-top: calc(14px + env(safe-area-inset-top)); }
+  .modal-foot {
+    border-radius: 0;
+    padding-bottom: calc(12px + env(safe-area-inset-bottom));
+  }
+  /* Speichern/Abbrechen sollen die volle Breite teilen, nicht zusammenkleben. */
+  .modal-foot .btn { flex: 1 1 auto; justify-content: center; }
+  .modal-foot .spacer { flex: 0; }
+
+  .filterbar .inp { max-width: none; flex: 1 1 140px; }
+}
+
+@media (max-width: 420px) {
+  .kachel-grid { grid-template-columns: 1fr 1fr; }
+  .volk-auswahl { grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); }
+}
