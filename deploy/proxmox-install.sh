@@ -4,12 +4,11 @@
 # und installiert die App. Konfiguration über Environment-Variablen — Defaults siehe unten.
 #
 # Schnellaufruf (auf dem Proxmox-Host):
-#   bash -c "$(wget -qO- https://raw.githubusercontent.com/<USER>/<REPO>/main/deploy/proxmox-install.sh)"
+#   bash -c "$(wget -qO- https://raw.githubusercontent.com/mgoebel89/ImkereiApp/master/deploy/proxmox-install.sh)"
 #
 # Mit Konfiguration:
 #   CTID=220 HOSTNAME=imkerei BRIDGE=vmbr0 IPV4=dhcp \
-#     REPO_URL=https://github.com/<USER>/<REPO>.git \
-#     bash -c "$(wget -qO- https://raw.githubusercontent.com/<USER>/<REPO>/main/deploy/proxmox-install.sh)"
+#     bash -c "$(wget -qO- https://raw.githubusercontent.com/mgoebel89/ImkereiApp/master/deploy/proxmox-install.sh)"
 
 set -euo pipefail
 
@@ -27,8 +26,8 @@ set -euo pipefail
 : "${GATEWAY:=}"                           # nur bei statischer IP nötig
 : "${UNPRIVILEGED:=1}"
 : "${PASSWORD:=}"                          # leer = zufälliges Passwort wird gesetzt + ausgegeben
-: "${REPO_URL:=https://github.com/mgoebel89/ImkereiApp.git}"
-: "${REPO_BRANCH:=main}"
+: "${REPO_URL:=https://github.com/mgoebel89/ImkereiApp.git}"   # öffentliches Repo, kein Token nötig
+: "${REPO_BRANCH:=master}"
 : "${HTTP_PORT:=80}"                       # leitet nur auf HTTPS um
 : "${HTTPS_PORT:=443}"
 

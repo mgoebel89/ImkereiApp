@@ -28,7 +28,7 @@ Bienenstand auf dem Telefon, ausgewertet wird daheim am Rechner.
 Auf dem **Proxmox-Host** als root:
 
 ```bash
-bash -c "$(wget -qO- https://raw.githubusercontent.com/<USER>/<REPO>/main/deploy/proxmox-install.sh)"
+bash -c "$(wget -qO- https://raw.githubusercontent.com/mgoebel89/ImkereiApp/master/deploy/proxmox-install.sh)"
 ```
 
 Das Skript legt einen unprivilegierten Debian-12-Container an, installiert Node,
@@ -39,8 +39,7 @@ Konfigurierbar über Umgebungsvariablen:
 
 ```bash
 CTID=220 HOSTNAME=imkerei BRIDGE=vmbr0 IPV4=192.168.1.60/24 GATEWAY=192.168.1.1 \
-  REPO_URL=https://github.com/<USER>/<REPO>.git \
-  bash -c "$(wget -qO- https://raw.githubusercontent.com/<USER>/<REPO>/main/deploy/proxmox-install.sh)"
+  bash -c "$(wget -qO- https://raw.githubusercontent.com/mgoebel89/ImkereiApp/master/deploy/proxmox-install.sh)"
 ```
 
 | Variable | Vorgabe | Bedeutung |
