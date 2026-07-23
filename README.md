@@ -91,6 +91,31 @@ Das Skript holt den aktuellen Stand aus Git, installiert bei Bedarf neue
 Backend-Abhängigkeiten und übernimmt geänderte nginx- und systemd-Konfiguration.
 Die gewählten Ports bleiben dabei erhalten.
 
+### Wenn etwas hakt
+
+Die gesamte Einrichtung im Container steckt in `deploy/container-setup.sh` und ist
+wiederholbar. Sie lässt sich jederzeit erneut anstoßen:
+
+```bash
+imkerei-setup
+```
+
+Das Skript sagt bei einem Abbruch, an welchem Schritt es hing, und prüft am Ende
+selbst nach: Backend erreichbar, nginx reicht `/api/` durch, Oberfläche wird
+ausgeliefert.
+
+**Es erscheint die nginx-Startseite statt der App.** Dann ist die Einrichtung
+abgebrochen, bevor die Site aktiv wurde — nginx läuft noch mit seiner
+Ausgangskonfiguration. `imkerei-setup` erneut ausführen und die Fehlermeldung
+lesen. Zur Diagnose:
+
+```bash
+systemctl status imkerei-backend --no-pager
+journalctl -u imkerei-backend -n 40 --no-pager
+nginx -t
+ls -l /etc/nginx/sites-enabled/
+```
+
 ---
 
 ## Sicherung und Wiederherstellung

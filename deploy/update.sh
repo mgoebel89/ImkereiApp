@@ -59,7 +59,8 @@ fi
 # Hilfsskripte aktualisieren
 install -m 0755 deploy/backup.sh /usr/local/bin/imkerei-backup
 install -m 0755 deploy/update.sh /usr/local/bin/imkerei-update
+install -m 0755 deploy/container-setup.sh /usr/local/bin/imkerei-setup
 ln -sfn /usr/local/bin/imkerei-update /usr/local/bin/update
-printf 'Imkereiverwaltung\n  App aktualisieren:  update\n  Backup jetzt:       imkerei-backup\n' > /etc/motd
+printf 'Imkereiverwaltung\n  App aktualisieren:  update\n  Backup jetzt:       imkerei-backup\n  Einrichtung neu:    imkerei-setup\n' > /etc/motd
 
 echo "Update abgeschlossen: $(git log -1 --pretty=format:'%h %s')"

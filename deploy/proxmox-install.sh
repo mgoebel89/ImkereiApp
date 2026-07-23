@@ -121,70 +121,32 @@ done
 if [[ "$HTTPS_PORT" == "443" ]]; then HTTPS_SUFFIX=""; else HTTPS_SUFFIX=":${HTTPS_PORT}"; fi
 
 # -------- Setup im Container --------
-log "Installiere App + Backend im Container…"
+# Die eigentliche Einrichtung steckt in container-setup.sh. Sie hier nicht als
+# gequotete Zeichenkette zu wiederholen, spart das fehleranfällige Escaping und
+# macht sie im Container einzeln wiederholbar (`imkerei-setup`).
+log "Hole Repository in den Container…"
 pct exec "$CTID" -- bash -lc "
   set -euo pipefail
   export DEBIAN_FRONTEND=noninteractive
   apt-get update -qq
-  apt-get install -y -qq nginx git ca-certificates curl sqlite3 cron openssl >/dev/null
-
-  # Node.js 20.x via NodeSource
-  if ! command -v node >/dev/null 2>&1; then
-    curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
-    apt-get install -y -qq nodejs >/dev/null
-  fi
-
-  mkdir -p /opt /var/lib/imkerei /var/backups/imkerei
+  apt-get install -y -qq git ca-certificates curl >/dev/null
   if [ ! -d /opt/imkerei/.git ]; then
     git clone --depth=1 --branch '${REPO_BRANCH}' '${REPO_URL}' /opt/imkerei
   fi
-
-  # Backend installieren
-  (cd /opt/imkerei/backend && npm install --omit=dev --no-audit --no-fund)
-  cp /opt/imkerei/deploy/backend.service /etc/systemd/system/imkerei-backend.service
-  systemctl daemon-reload
-  systemctl enable --now imkerei-backend
-
-  # Selbstsigniertes Zertifikat — ohne HTTPS bleibt die Handy-Kamera stumm
-  # (Barcode-Scan und Fotoaufnahme brauchen einen 'secure context').
-  install -d -m 0700 /etc/ssl/imkerei
-  if [ ! -f /etc/ssl/imkerei/server.crt ]; then
-    IPADDR=\$(hostname -I | awk '{print \$1}')
-    openssl req -x509 -nodes -newkey rsa:2048 -days 3650 \
-      -keyout /etc/ssl/imkerei/server.key \
-      -out /etc/ssl/imkerei/server.crt \
-      -subj \"/CN=${HOSTNAME}\" \
-      -addext \"subjectAltName=DNS:${HOSTNAME},DNS:localhost,IP:\${IPADDR},IP:127.0.0.1\" >/dev/null 2>&1
-    chmod 0600 /etc/ssl/imkerei/server.key
-  fi
-
-  # Frontend
-  install -d /var/www
-  ln -sfn /opt/imkerei/app /var/www/imkerei
-  sed -e 's/__HTTP_PORT__/${HTTP_PORT}/g' \
-      -e 's/__HTTPS_PORT__/${HTTPS_PORT}/g' \
-      -e 's/__HTTPS_SUFFIX__/${HTTPS_SUFFIX}/g' \
-      /opt/imkerei/deploy/nginx-site.conf > /etc/nginx/sites-available/imkerei
-  ln -sfn /etc/nginx/sites-available/imkerei /etc/nginx/sites-enabled/imkerei
-  rm -f /etc/nginx/sites-enabled/default
-
-  install -m 0755 /opt/imkerei/deploy/update.sh /usr/local/bin/imkerei-update
-  install -m 0755 /opt/imkerei/deploy/backup.sh /usr/local/bin/imkerei-backup
-  # Kurzbefehl 'update' (wie bei den Proxmox-Helper-Scripts)
-  ln -sfn /usr/local/bin/imkerei-update /usr/local/bin/update
-  printf 'Imkereiverwaltung\n  App aktualisieren:  update\n  Backup jetzt:       imkerei-backup\n' > /etc/motd
-
-  # Cron: tägliches Backup um 03:30
-  echo '30 3 * * * root /usr/local/bin/imkerei-backup >/var/log/imkerei-backup.log 2>&1' > /etc/cron.d/imkerei-backup
-  chmod 0644 /etc/cron.d/imkerei-backup
-
-  nginx -t
-  systemctl enable --now nginx
-  systemctl reload nginx
 "
 
+log "Richte App + Backend im Container ein (das dauert einige Minuten)…"
+if ! pct exec "$CTID" -- env \
+      REPO_URL="$REPO_URL" REPO_BRANCH="$REPO_BRANCH" \
+      HTTP_PORT="$HTTP_PORT" HTTPS_PORT="$HTTPS_PORT" CERT_HOST="$HOSTNAME" \
+      bash /opt/imkerei/deploy/container-setup.sh; then
+  err "Die Einrichtung im Container ist fehlgeschlagen (Meldungen oben)."
+  err "Der Container $CTID bleibt bestehen. Nach dem Beheben erneut versuchen mit:"
+  err "    pct exec $CTID -- imkerei-setup"
+  exit 1
+fi
+
 # IP ermitteln
-sleep 2
 CT_IP=$(pct exec "$CTID" -- bash -lc "hostname -I | awk '{print \$1}'" || true)
 
 ok "Fertig."
@@ -206,4 +168,7 @@ echo
 echo "  Update später einspielen:"
 echo "    • vom Proxmox-Host:      pct exec $CTID -- update"
 echo "    • in der Container-Konsole einfach:   update"
+echo
+echo "  Einrichtung wiederholen (falls etwas hakt):"
+echo "    pct exec $CTID -- imkerei-setup"
 echo "─────────────────────────────────────────────"
